@@ -1,0 +1,1146 @@
+<html lang="zh-CN"><head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://blog.csdn.net/wuzhikaidetb/article/details/121895673">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}">
+    <meta name="referrer" content="always">
+    <meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" media="handheld" href="#">
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+    <meta name="applicable-device" content="pc">
+    <link href="https://g.csdnimg.cn/static/logo/favicon32.ico" rel="shortcut icon" type="image/x-icon">
+    <title>从底层结构开始学习FPGA（14）----时钟结构_fpga局部时钟-CSDN博客</title>
+    <script type="text/javascript" async="" src="https://pos.baidu.com/auto_dup?di=0&amp;uuid=60856a74f116dacb&amp;dri=0&amp;dis=0&amp;dai=0&amp;ps=0x0&amp;enu=encoding&amp;exps=110011&amp;ant=0&amp;psi=8b3546cff38d5f38&amp;dcb=___baidu_union_callback&amp;dtm=AUTO_JSONP&amp;dvi=0.0&amp;dci=-1&amp;dpt=none&amp;tpr=1730364850780&amp;ti=%E4%BB%8E%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84%E5%BC%80%E5%A7%8B%E5%AD%A6%E4%B9%A0FPGA%EF%BC%8814%EF%BC%89----%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84_fpga%E5%B1%80%E9%83%A8%E6%97%B6%E9%92%9F-CSDN%E5%8D%9A%E5%AE%A2&amp;ari=2&amp;ver=0722&amp;kws=fpga%E5%B1%80%E9%83%A8%E6%97%B6%E9%92%9F&amp;dps=%E6%96%87%E7%AB%A0%E6%B5%8F%E8%A7%88%E9%98%85%E8%AF%BB8.8k%E6%AC%A1%EF%BC%8C%E7%82%B9%E8%B5%9E29%E6%AC%A1%EF%BC%8C%E6%94%B6%E8%97%8F98%E6%AC%A1%E3%80%82%E6%9C%AC%E6%96%87%E8%AF%A6%E7%BB%86%E4%BB%8B%E7%BB%8D%E4%BA%867%E7%B3%BB%E5%88%97FPGA%E7%9A%84%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84%EF%BC%8C%E5%8C%85%E6%8B%AC%E6%97%B6%E9%92%9F%E8%B5%84%E6%BA%90%E7%9A%84%E5%88%86%E7%B1%BB%E3%80%81%E6%97%B6%E9%92%9F%E7%AE%A1%E7%90%86%E5%9D%97%E3%80%81&amp;dbv=2&amp;drs=1&amp;pcs=1423x810&amp;pss=1423x810&amp;cfv=0&amp;cpl=3&amp;chi=50&amp;cce=true&amp;cec=UTF-8&amp;tlm=1730364850&amp;prot=2&amp;rw=810&amp;ltu=https%3A%2F%2Fblog.csdn.net%2Fwuzhikaidetb%2Farticle%2Fdetails%2F121895673&amp;ecd=1&amp;dft=0&amp;uc=1920x1160&amp;pis=-1x-1&amp;sr=1920x1200&amp;tcn=1730364851&amp;dc=4&amp;aa=1"></script><script type="text/javascript" charset="utf-8" async="" src="https://gsp0.baidu.com/yrwHcjSl0MgCo2Kml5_Y_D3/api/customsearch/apiaccept?sid=10742016945123576423&amp;v=2.0&amp;callback=csdn.afterBaiduSearchInit"></script><script async="" src="https://www.clarity.ms/s/0.7.49/clarity.js"></script><script type="text/javascript" async="" src="https://g.csdnimg.cn/asdf/1.1.3/trackad.js"></script><script src="https://zz.bdstatic.com/linksubmit/push.js"></script><script type="text/javascript" async="" src="https://g.csdnimg.cn/??asdf/1.1.3/trackad.js,iconfont/nav/iconfont-1.0.1.js,notification/1.3.8/notify.js,notification/1.3.8/main.js"></script><script src="https://hm.baidu.com/hm.js?6bcd52f51e9b3dce32bec4a3997715ac"></script><script async="" src="https://www.clarity.ms/tag/lgtpix6r85"></script><script src="https://s3a.pstatp.com/toutiao/push.js?1abfa13dfe74d72d41d83c86d240de427e7cac50c51ead53b2e79d40c7952a23ed7716d05b4a0f683a653eab3e214672511de2457e74e99286eb2c33f4428830" id="ttzz"></script><script>
+      (function(){ 
+        var el = document.createElement("script"); 
+        el.src = "https://s3a.pstatp.com/toutiao/push.js?1abfa13dfe74d72d41d83c86d240de427e7cac50c51ead53b2e79d40c7952a23ed7716d05b4a0f683a653eab3e214672511de2457e74e99286eb2c33f4428830"; 
+        el.id = "ttzz"; 
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(el, s);
+      })(window)
+    </script>
+        <meta name="keywords" content="fpga局部时钟">
+        <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;fpga局部时钟&quot;}">
+    <meta name="description" content="文章浏览阅读8.8k次，点赞29次，收藏98次。本文详细介绍了7系列FPGA的时钟结构，包括时钟资源的分类、时钟管理块、时钟缓冲和布线。全球时钟线、I/O时钟线和区域时钟线在设备中的分布以及如何通过全局时钟缓冲器(BUFG)、水平时钟缓冲器(BUFH)、区域时钟缓冲器(BUFR)和多区域时钟缓冲器(BUFMR)进行时钟管理。7系列FPGA的每个时钟区域包含特定数量的资源，如CLB、I/O、DSP和CMT，这些资源通过时钟管理块、MMCM和PLL进行频率合成和时钟管理。通过对时钟资源的理解，有助于优化FPGA设计中的时钟路径和性能。
+">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-9b2c86aa27.min.css">
+    <style>
+        #content_views{
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+    </style>
+    <script type="application/ld+json">{"@context":"https://ziyuan.baidu.com/contexts/cambrian.jsonld","@id":"https://blog.csdn.net/wuzhikaidetb/article/details/121895673","appid":"1638831770136827","pubDate":"2021-12-12T23:13:48","title":"从底层结构开始学习FPGA（14）----时钟结构_fpga局部时钟-CSDN博客","upDate":"2021-12-13T19:40:26"}</script>
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-blue/skin-blue-5e706cc758.min.css">
+    <script src="https://g.csdnimg.cn/lib/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
+    <script src="https://g.csdnimg.cn/lib/jquery-migrate/1.4.1/jquery-migrate.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var isCorporate = false;
+        var username =  "wuzhikaidetb";
+        var skinImg = "white";
+
+        var blog_address = "https://wuzhikai.blog.csdn.net";
+        var currentUserName = "NicetoMe2";
+        var isOwner = false;
+        var loginUrl = "http://passport.csdn.net/account/login?from=https://blog.csdn.net/wuzhikaidetb/article/details/121895673";
+        var blogUrl = "https://blog.csdn.net/";
+        var avatar = "https://profile-avatar.csdnimg.cn/280e9316443d4d29ad594647b6015d65_wuzhikaidetb.jpg!1";
+        var articleTitle = "从底层结构开始学习FPGA（14）----时钟结构";
+        var articleDesc = "文章浏览阅读8.8k次，点赞29次，收藏98次。本文详细介绍了7系列FPGA的时钟结构，包括时钟资源的分类、时钟管理块、时钟缓冲和布线。全球时钟线、I/O时钟线和区域时钟线在设备中的分布以及如何通过全局时钟缓冲器(BUFG)、水平时钟缓冲器(BUFH)、区域时钟缓冲器(BUFR)和多区域时钟缓冲器(BUFMR)进行时钟管理。7系列FPGA的每个时钟区域包含特定数量的资源，如CLB、I/O、DSP和CMT，这些资源通过时钟管理块、MMCM和PLL进行频率合成和时钟管理。通过对时钟资源的理解，有助于优化FPGA设计中的时钟路径和性能。\r";
+        var articleTitles = "从底层结构开始学习FPGA（14）----时钟结构_fpga局部时钟-CSDN博客";
+        var nickName = "孤独的单刀";
+        var articleDetailUrl = "https://wuzhikai.blog.csdn.net/article/details/121895673";
+        var vipUrlV = "https://mall.csdn.net/vip?vipSource=learningVip";
+        if(window.location..host.split('.').length == 3) {
+            blog_address = blogUrl + username;
+        }
+        var skinStatus = "White";
+        var blogStaticHost = "https://csdnimg.cn/release/blogv2/"
+          var payColumn = true
+    </script>
+        <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">
+    <script src="https://g.csdnimg.cn/??fixed-sidebar/1.1.7/fixed-sidebar.js" type="text/javascript"></script>
+      <script src="https://cdn-static-devbit.csdn.net/ai100/chat/chat-search.js?v=2" type="text/javascript"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+    <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>
+    <script src="https://dup.baidustatic.com/js/ds.js"></script>
+      <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "lgtpix6r85");
+      </script>
+    
+<link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/common/csdn-toolbar/csdn-toolbar-default.css"><script type="text/javascript" src="https://g.csdnimg.cn/common/csdn-cert-new/csdn-cert-new.js"></script><script type="text/javascript" src="https://g.csdnimg.cn/common/csdn-notification/csdn-notification.js"></script><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/collection-box/2.1.2/collection-box.css"><script type="text/javascript" src="https://g.csdnimg.cn/user-login/3.0.1/user-login.js"></script><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/user-tooltip/2.6/user-tooltip.css"><script type="text/javascript" src="https://g.csdnimg.cn/lib/html2canvas/1.4.1/html2canvas.min.js"></script><style type="text/css">.hljs-ln{border-collapse:collapse}            .hljs-ln td{padding:0}            .hljs-ln-n{text-align: right;padding-right: 8px;}            .hljs-ln-n:before{content:attr(data-line-number)}</style><style type="text/css">pre{position: relative}pre:hover .code-full-screen{display:none !important;}.code-full-screen{display: none !important;position: absolute;right: 4px;top: 3px;width: 24px !important;height: 24px !important;margin: 4px !important;z-index: 20;}pre:hover .hljs-button{display: block}.hljs-button{display: none;position: absolute;right: 4px;top: 4px;font-size: 12px;color: #ffffff;background-color: #9999AA;width:58px;text-align: center;padding:2px 0;z-index: 20;margin: 8px;border-radius: 4px;cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);}.hljs-button:after{content: attr(data-title)}code .hljs-button{margin: 2px 8px;}</style><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/user-accusation/1.0.5/user-accusation.css"><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/user-ordertip/5.0.3/user-ordertip.css"><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/order-payment/4.0.5/order-payment.css"><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/side-toolbar/3.5/side-toolbar.css"><style type="text/css">.caption{box-sizing:content-box;}</style><link rel="stylesheet" type="text/css" href="https://g.csdnimg.cn/user-login/3.0.0/user-login.css"><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+  <body class="nodata " style=""><div id="MathJax_Message" style="display: none;"></div>
+    
+        <script>
+            var toolbarSearchExt = '{"landingWord":["fpga局部时钟"],"queryWord":"","tag":["fpga开发","Xilinx","时钟","BUFG","BUFH"],"title":"从底层结构开始学习FPGA（14）----时钟结构"}';
+        </script>
+    <script src="https://g.csdnimg.cn/common/csdn-toolbar/csdn-toolbar.js" type="text/javascript"></script>
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location..protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
+
+    <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css">
+    <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css">
+    <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">
+    <script src="https://g.csdnimg.cn/lib/swiper/6.0.4/js/swiper.js" async=""></script>
+    <script>
+      var articleId = 121895673;
+        var privateData = ["log.c","pcie","gat","fpga"];//高亮数组
+      var commentscount = 9;
+      var commentAuth = 2;
+      var curentUrl = "https://blog.csdn.net/wuzhikaidetb/article/details/121895673";
+      var myUrl = "https://my.csdn.net/";
+      var isGitCodeBlog = false;
+        var highlight = ["xilinx","fpga","----","bufg","bufh","学习","局部","14","时钟","底层","开发","结构"];//高亮数组
+        var isRecommendModule = true;
+          var isBaiduPre = false;
+          var baiduCount = 2;
+          var setBaiduJsCount = 2;
+        var viewCountFormat = 8863;
+      var share_card_url = "https://app-blog.csdn.net/share?article_id=121895673&username=wuzhikaidetb"
+      var mallVipUrl = "https://mall.csdn.net/vip?vipSource=article"
+      var vipArticleAbStyle = "t_2"
+
+      var vipArticleCpStyle = "t_2"
+      var articleType = 1;
+      var baiduKey = "fpga局部时钟";
+      var copyPopSwitch = true;
+      var needInsertBaidu = true;
+      var recommendRegularDomainArr = ["blog.csdn.net/.+/article/details/","download.csdn.net/download/","edu.csdn.net/course/detail/","ask.csdn.net/questions/","bbs.csdn.net/topics/","www.csdn.net/gather_.+/"]
+      var codeStyle = "github-gist";
+      var baiduSearchType = "baidulandingword";
+      var sharData = "{\"hot\":[{\"id\":1,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/a5f4260710904e538002a6ab337939b3.png\"},{\"id\":2,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/188b37199a2c4b74b1d9ffc39e0d52de.png\"},{\"id\":3,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/14ded358b631444581edd98a256bc5af.png\"},{\"id\":4,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/1470f23a770444d986ad551b9c33c5be.png\"},{\"id\":5,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/c329f5181dc74f6c9bd28c982bb9f91d.png\"},{\"id\":6,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/ccd8a3305e81460f9c505c95b432a65f.png\"},{\"id\":7,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/bc89d8283389440d97fc4d30e30f45e1.png\"},{\"id\":8,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/452d485b4a654f5592390550d2445edf.png\"},{\"id\":9,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/f8b9939db2ed474a8f43a643015fc8b7.png\"},{\"id\":10,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/6de8864187ab4ed3b1db0856369c36ff.png\"},{\"id\":11,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/673cc3470ff74072acba958dc0c46e2d.png\"},{\"id\":12,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/930c119760ac4491804db80f9c6d4e3f.png\"},{\"id\":13,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/15e6befb05a24233bc2b65e96aa8d972.png\"},{\"id\":14,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/2075fd6822184b95a41e214de4daec13.png\"},{\"id\":15,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/859b1552db244eb6891a809263a5c657.png\"},{\"id\":16,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/0be2f920f1f74290a98921974a9613fd.png\"},{\"id\":17,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/2e97e00b43f14afab494ea55ef3f4a6e.png\"},{\"id\":18,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/ff4ab252f46e444686f5135d6ebbfec0.png\"},{\"id\":19,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/ae029bbe99564e79911657912d36524f.png\"},{\"id\":20,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/b3ece39963de440388728e9e7b9bf427.png\"},{\"id\":21,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/6f14651a99ba486e926d63b6fa692997.png\"},{\"id\":22,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/83ceddf050084875a341e32dcceca721.png\"},{\"id\":23,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/b90368b8fd5d4c6c8c79a707d877cf7c.png\"},{\"id\":24,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/aeffae14ecf14e079b2616528c9a393b.png\"},{\"id\":25,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/c5a06b5a13d44d16bed868fc3384897a.png\"},{\"id\":26,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/08b697658b844b318cea3b119e9541ef.png\"},{\"id\":27,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/68ccb0b8d09346ac961d2b5c1a8c77bf.png\"},{\"id\":28,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/a2227a247e37418cbe0ea972ba6a859b.png\"},{\"id\":29,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/3a42825fede748f9993e5bb844ad350d.png\"},{\"id\":30,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/8882abc1dd484224b636966ea38555c3.png\"},{\"id\":31,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/4f6a5f636a3e444d83cf8cc06d87a159.png\"},{\"id\":32,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/1953ef79c56b4407b78d7181bdff11c3.png\"},{\"id\":33,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/c04a2a4f772948ed85b5b0380ed36287.png\"},{\"id\":34,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/5b4fecd05091405ea04d8c0f53e9f2c7.png\"},{\"id\":35,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/b89f576d700344e280d6ceb2a66c2420.png\"},{\"id\":36,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/1c65780e11804bbd9971ebadb3d78bcf.png\"},{\"id\":37,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/d590db2055f345db9706eb68a7ec151a.png\"},{\"id\":38,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/fe602f80700b4f6fb3c4a9e4c135510e.png\"},{\"id\":39,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/39ff2fcd31e04feba301a071976a0ba7.png\"},{\"id\":40,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/f9b61b3d113f436b828631837f89fb39.png\"},{\"id\":41,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/df1aca5f610c4ad48cd16da88c9c8499.png\"},{\"id\":42,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/d7acf73a1e6b41399a77a85040e10961.png\"},{\"id\":43,\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/b7f1b63542524b97962ff649ab4e7e23.png\"}],\"vip\":[{\"id\":1,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101150.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101154.png\"},{\"id\":2,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101204.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101208.png\"},{\"id\":3,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101211.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101215.png\"},{\"id\":4,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101218.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101220.png\"},{\"id\":5,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101223.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220920101226.png\"},{\"id\":6,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100635.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100639.png\"},{\"id\":7,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100642.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100644.png\"},{\"id\":8,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100647.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100649.png\"},{\"id\":9,\"vipUrl\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100652.png\",\"url\":\"https:\\/\\/img-home.csdnimg.cn\\/images\\/20220922100655.png\"},{\"id\":10,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/55de67481fde4b04b97ad78f11fe369a.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/bb2418fb537e4d78b10d8765ccd810c5.png\"},{\"id\":11,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/579c713394584d128104ef1044023954.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/f420d9fbcf5548079d31b5e809b6d6cd.png\"},{\"id\":12,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/75b7f3155ba642f5a4cc16b7baf44122.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/a9030f5877be401f8b340b80b0d91e64.png\"},{\"id\":13,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/0903d33cafa54934be3780aa54ae958d.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/2cd8c8929f5a42fca5da2a0aeb456203.png\"},{\"id\":14,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/949fd7c22884439fbfc3c0e9c3b8dee7.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/dafbea9bd9eb4f3b962b48dc41657f89.png\"},{\"id\":15,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/4119cfddd71d4e6a8a27a18dbb74d90e.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/c56310c8b6384d9e85388e4e342ce508.png\"},{\"id\":16,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/121575274da142bcbbbbc2e8243dd411.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/5013993de06542f881018bb9abe2edf7.png\"},{\"id\":17,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/4d97aa6dd4fe4f09a6bef5bdf8a6abcd.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/76f23877b6ad4066ad45ce8e31b4b977.png\"},{\"id\":18,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/fdb619daf21b4c829de63b9ebc78859d.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/a1abe5d27a5441f599adfe662f510243.png\"},{\"id\":19,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/676b7707bb11410f8f56bc0ed2b2345c.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/7ac5b467fbf24e1d8c2de3f3332c4f54.png\"},{\"id\":20,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/0becb8cc227e4723b765bdd69a20fd4a.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/fdec85b26091486b9a89d0b8d45c3749.png\"},{\"id\":21,\"vipUrl\":\"https:\\/\\/img-blog.csdnimg.cn\\/1a6c06235ad44941b38c54cbc25a370c.png\",\"url\":\"https:\\/\\/img-blog.csdnimg.cn\\/410a06cda2d44b0c84578f88275caf70.png\"}],\"map\":{\"hot\":\"热门\",\"vip\":\"VIP\"}}";
+      
+      var canRead = true;
+      var blogMoveHomeArticle = false;
+      var showSearchText = "";
+      var articleSource = 1;
+      var articleReport = '{"pid": "blog", "spm":"1001.2101"}';
+        var baiduSearchChannel = 'pc_relevant'
+        var baiduSearchIdentification = '.235^v43^pc_blog_bottom_relevance_base3'
+        var distRequestId = '1730364849722_30695'
+        var initRewardObject = {
+          giver: "NicetoMe2",
+          anchor: "wuzhikaidetb",
+          articleId: "121895673",
+          sign: "7ed07fa4305fce473b363b594f210b48",
+        }
+        var isLikeStatus = false;
+        var isUnLikeStatus = false;
+        var studyLearnWord = "";
+        var unUseCount = 0;
+        var codeMaxSize = 0;
+        var overCost = true;
+        var isCurrentUserVip = true
+        var contentViewsHeight = 0;
+        var contentViewsCount = 0;
+        var contentViewsCountLimit = 5;
+        var isShowConcision = true
+        var lastTime = "2022-07-18 11:53:56"
+        var postTime = "2021-12-13 19:40:26"
+      var isCookieConcision = false
+      var isHasDirectoryModel = false
+      var isShowSideModel = false
+      var isShowDirectoryModel = true
+      function getCookieConcision(sName){
+        var allCookie = document.cookie.split("; ");
+        for (var i=0; i < allCookie.length; i++){
+          var aCrumb = allCookie[i].split("=");
+          if (sName == aCrumb[0])
+            return aCrumb[1];
+        }
+        return null;
+      }
+      if (getCookieConcision('blog_details_concision') && getCookieConcision('blog_details_concision') == 0){
+        isCookieConcision = true
+        isShowSideModel = true
+        isShowDirectoryModel = false
+      }
+    </script>
+        <div class="main_father clearfix d-flex justify-content-center" style="height:100%;">
+          <div class="container clearfix" id="mainBox">
+          <script>
+          if (!isCookieConcision) {
+            $('.main_father').removeClass('mainfather-concision')
+            $('.main_father .container').removeClass('container-concision')
+          } else {
+            $('#mainBox').css('margin-right', '0')
+          }
+          </script>
+          <main>
+<script type="text/javascript">
+    var resourceId =  "";
+    function getQueryString(name) {   
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象  
+      var r = window.location..search.substr(1).match(reg);  //匹配目标参数
+      if( r != null ) return decodeURIComponent( r[2] ); return '';   
+    }
+    function stripscript(s){ 
+      var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%]") 
+      var rs = ""; 
+      for (var i = 0; i < s.length; i++) { 
+        rs = rs+s.substr(i, 1).replace(pattern, ''); 
+      } 
+      return rs;
+    }
+    var blogHotWords = stripscript(getQueryString('utm_term')).length > 1 ? stripscript(getQueryString('utm_term')) : ''
+</script>
+<div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">从底层结构开始学习FPGA（14）----时钟结构</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt="">
+                    <div class="bar-content">
+                      <a class="follow-nickName vip-name" href="https://wuzhikai.blog.csdn.net" target="_blank" rel="noopener" title="孤独的单刀">孤独的单刀</a>
+                    <img class="article-time-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUpTime2.png" alt="">
+                    <span class="time">已于&nbsp;2022-07-18 11:53:56&nbsp;修改</span>
+                   <div class="read-count-box">
+                      <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes2.png" alt="">
+                      <span class="read-count">阅读量8.8k</span>
+                      <a id="blog_detail_zk_collection" class="un-collection" data-report-click="{&quot;mod&quot;:&quot;popu_823&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                          <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect2.png" alt="">
+                          <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive2.png" alt="">
+                          <span class="name">收藏</span>
+                          <span class="get-collection">
+                              98
+                          </span>
+                      </a>
+                      <div class="read-count-box is-like">
+                        <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Active.png" alt="">
+                        <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Black.png" alt="">
+                        <span class="read-count" id="blog-digg-num">点赞数
+                            29
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/wuzhikaidetb/category_11546372.html" target="_blank" rel="noopener">从底层结构开始学习FPGA</a>
+                                <a class="tag-link" href="https://blog.csdn.net/wuzhikaidetb/category_11438763.html" target="_blank" rel="noopener">技术文档翻译</a>
+                            <span class="label">文章标签：</span>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;fpga开发&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;fpga开发\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=fpga%E5%BC%80%E5%8F%91&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">fpga开发</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;Xilinx&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;Xilinx\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=Xilinx&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">Xilinx</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;时钟&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;时钟\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E6%97%B6%E9%92%9F&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">时钟</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;BUFG&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;BUFG\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=BUFG&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">BUFG</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;BUFH&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;BUFH\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=BUFH&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">BUFH</a>
+                    </div>
+                </div>
+                <div class="up-time"><span>于&nbsp;2021-12-13 19:40:26&nbsp;首次发布</span></div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/wuzhikaidetb/article/details/121895673" target="_blank">https://blog.csdn.net/wuzhikaidetb/article/details/121895673</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="blogHuaweiyunAdvert"></div>
+        <div id="blogColumnPayAdvert">
+            <div class="column-group">
+                <div class="column-group-item column-group0 ">
+                    <div class="item-l">
+                        <a class="item-target" href="https://blog.csdn.net/wuzhikaidetb/category_11546372.html" target="_blank" title="从底层结构开始学习FPGA" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}">
+                            <img class="item-target" src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="">
+                            <span class="title item-target">
+                                <span>
+                                <span class="tit">从底层结构开始学习FPGA</span>
+                                    <span class="dec more">同时被 2 个专栏收录<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/newArrowDown1White.png" alt=""></span>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="item-m">
+                        <span>36 篇文章</span>
+                        <span>117 订阅</span>
+                        <span class="old-add-new-box">
+                            <span class="price">¥59.90</span>
+                            <span class="oldprice">¥99.00</span>
+                        </span>
+                    </div>
+                    <div class="item-r">
+                                    <a class="item-target article-column-subscribe">已订阅
+                                    </a>
+                                    <a class="item-target column-studyvip-discount column-studyvip-pass" data-report-click="{&quot;spm&quot;:&quot;1001.2015.3001.8590&quot;}">8折续费
+                                    </a>
+                    </div>
+                </div>
+                <div class="column-group-item column-group1 ">
+                    <div class="item-l">
+                        <a class="item-target" href="https://blog.csdn.net/wuzhikaidetb/category_11438763.html" target="_blank" title="技术文档翻译" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}">
+                            <img class="item-target" src="https://img-blog.csdnimg.cn/73f5cc9c83ce4ef39c04ffc2fe778a28.jpg?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                            <span class="title item-target">
+                                <span>
+                                <span class="tit">技术文档翻译</span>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="item-m">
+                        <span>25 篇文章</span>
+                        <span>127 订阅</span>
+                    </div>
+                    <div class="item-r">
+                            <a class="item-target article-column-bt articleColumnFreeBt" data-id="11438763">订阅专栏</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="learning_the_member_box">
+            <a href="https://www.csdn.net/vip?utm_source=bkzl_cjhy_ckqy" target="_blank">
+                <div class="left"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconVIpCrown.png" alt=""><span>您已是超级会员，正在免费阅读会员专享内容</span></div>
+                <div class="right"><span>查看更多超级会员权益</span><img src="https://csdnimg.cn/release/blogv2/dist/components/img/vipIconArrowLeftWhite.png" alt=""></div>
+            </a>
+        </div>
+      <div class="ai-abstract-box">
+         <div class="ai-abstract">
+          <div class="abstract-content">
+            <img class="lock-img" src="https://img-home.csdnimg.cn/images/20240711042549.png" alt="">
+            本文详细介绍了7系列FPGA的时钟结构，包括时钟资源的分类、时钟管理块、时钟缓冲和布线。全球时钟线、I/O时钟线和区域时钟线在设备中的分布以及如何通过全局时钟缓冲器(BUFG)、水平时钟缓冲器(BUFH)、区域时钟缓冲器(BUFR)和多区域时钟缓冲器(BUFMR)进行时钟管理。7系列FPGA的每个时钟区域包含特定数量的资源，如CLB、I/O、DSP和CMT，这些资源通过时钟管理块、MMCM和PLL进行频率合成和时钟管理。通过对时钟资源的理解，有助于优化FPGA设计中的时钟路径和性能。
+          </div>
+          <span>摘要由CSDN通过智能技术生成</span>
+        </div>
+      </div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+             
+                <div id="content_views" class="htmledit_views">
+                    <p id="main-toc" style="user-select: text;"><strong>文章目录</strong></p> 
+<p id="%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95%E4%B8%8E%E4%BC%A0%E9%80%81%E9%97%A8-toc" style="margin-left: 0px; user-select: text;"><a href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95%E4%B8%8E%E4%BC%A0%E9%80%81%E9%97%A8" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95%E4%B8%8E%E4%BC%A0%E9%80%81%E9%97%A8" rel="nofollow">系列目录与传送门</a></p> 
+<p id="%E4%B8%80%E3%80%81%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0-toc" style="margin-left: 0px; user-select: text;"><a href="#%E4%B8%80%E3%80%81%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E4%B8%80%E3%80%81%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0" rel="nofollow">一、时钟结构概述</a></p> 
+<p id="%E4%BA%8C%E3%80%81%E6%97%B6%E9%92%9F%E5%B8%83%E7%BA%BF%E8%B5%84%E6%BA%90%E6%A6%82%E8%BF%B0-toc" style="margin-left: 0px; user-select: text;"><a href="#%E4%BA%8C%E3%80%81%E6%97%B6%E9%92%9F%E5%B8%83%E7%BA%BF%E8%B5%84%E6%BA%90%E6%A6%82%E8%BF%B0" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E4%BA%8C%E3%80%81%E6%97%B6%E9%92%9F%E5%B8%83%E7%BA%BF%E8%B5%84%E6%BA%90%E6%A6%82%E8%BF%B0" rel="nofollow">二、时钟布线资源概述</a></p> 
+<p id="%E4%B8%89%E3%80%81%E6%97%B6%E9%92%9F%E7%AE%A1%E7%90%86%E5%9D%97%E6%A6%82%E8%BF%B0-toc" style="margin-left: 0px; user-select: text;"><a href="#%E4%B8%89%E3%80%81%E6%97%B6%E9%92%9F%E7%AE%A1%E7%90%86%E5%9D%97%E6%A6%82%E8%BF%B0" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E4%B8%89%E3%80%81%E6%97%B6%E9%92%9F%E7%AE%A1%E7%90%86%E5%9D%97%E6%A6%82%E8%BF%B0" rel="nofollow">三、时钟管理块概述</a></p> 
+<p id="%E5%9B%9B%E3%80%81%E6%97%B6%E9%92%9F%E7%BC%93%E5%86%B2%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E5%B8%83%E7%BA%BF-toc" style="margin-left: 0px; user-select: text;"><a href="#%E5%9B%9B%E3%80%81%E6%97%B6%E9%92%9F%E7%BC%93%E5%86%B2%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E5%B8%83%E7%BA%BF" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E5%9B%9B%E3%80%81%E6%97%B6%E9%92%9F%E7%BC%93%E5%86%B2%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E5%B8%83%E7%BA%BF" rel="nofollow">四、时钟缓冲、管理和布线</a></p> 
+<p id="%E4%BA%94%E3%80%81%E6%97%B6%E9%92%9F%E8%BF%9E%E6%8E%A5%E6%A6%82%E8%BF%B0-toc" style="margin-left: 0px; user-select: text;"><a href="#%E4%BA%94%E3%80%81%E6%97%B6%E9%92%9F%E8%BF%9E%E6%8E%A5%E6%A6%82%E8%BF%B0" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E4%BA%94%E3%80%81%E6%97%B6%E9%92%9F%E8%BF%9E%E6%8E%A5%E6%A6%82%E8%BF%B0" rel="nofollow">五、时钟连接概述</a></p> 
+<p id="%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93-toc" style="margin-left: 0px; user-select: text;"><a href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93" rel="nofollow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><a href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93" rel="nofollow">六、总结</a></p> 
+<hr id="hr-toc"> 
+<h2>系列目录与传送门</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://wuzhikai.blog.csdn.net/article/details/124973925" rel="nofollow" title="《从底层结构开始学习FPGA》目录与传送门">《从底层结构开始学习FPGA》目录与传送门</a></p> 
+<p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 之前<span style="color:#0d0016;">笔者</span>也是被7系列的一大堆BUFG、BUFH、BUGR等等BUF搞得头都晕了，加上平时一般只用BUFG这个全局时钟缓冲，导致一直对7系列的时钟资源理解不多。下面就一起把官方手册《UG472：7 <a href="https://so.csdn.net/so/search?q=Series&amp;spm=1001.2101.3001.7020" target="_blank" class="hl hl-1" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.7020&quot;,&quot;dest&quot;:&quot;https://so.csdn.net/so/search?q=Series&amp;spm=1001.2101.3001.7020&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;Series\&quot;}&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.7020&quot;,&quot;dest&quot;:&quot;https://so.csdn.net/so/search?q=Series&amp;spm=1001.2101.3001.7020&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;Series\&quot;}&quot;}" data-tit="Series" data-pretit="series">Series</a> FPGAs Clocking Resources》的第一章节（时钟结构部分）好好研究研究。</p> 
+<p style="user-select: text;"><span style="color:#38d8f0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#0d0016;">正文部分的黑色字翻译自UG472，蓝色字为笔者理解。</span></p> 
+<hr> 
+<h2 id="%E4%B8%80%E3%80%81%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0">一、时钟结构概述</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7系列<span class="words-blog hl-git-1" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.10283&quot;,&quot;extra&quot;:&quot;{\&quot;words\&quot;:\&quot;FPGA\&quot;}&quot;}" data-tit="FPGA" data-pretit="fpga">FPGA</span>的时钟资源通过专用的全局和区域I/O和时钟资源管理复杂和简单的时钟需求。时钟管理块(CMT)提供时钟频率合成、减少偏移和抖动过滤等功能。非时钟资源，如本地布线，则在设计时钟功能时不推荐使用。</p> 
+<ul><li>全局时钟树允许同步元素的时钟跨越设备</li><li>I/O时钟和区域时钟树允许最多三个垂直相邻的时钟区域的时钟</li><li>每个时钟管理块(CMT)包含一个混合模式时钟管理器(MMCM)和一个锁相环(PLL)，位于I/O列旁边的CMT列</li></ul> 
+<p style="user-select: text;"></p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了时钟使用，每个7系列设备被划分为多个时钟区域。</p> 
+<ul><li>时钟区域的数量随着设备大小的不同而变化，最小的设备上有一个时钟区域，最大的设备上有24个时钟区域。</li><li>一个时钟区域包括所有同步元素(例如：CLB、I/O、串行收发器、DSP、块RAM、CMT)，该区域跨越50个CLB和一个I/O BANK(50个I/O)，其中心有一个水平时钟行(HROW)。</li><li>每个时钟区域从HROW向上跨越25个CLB，从HROW向下跨越25个CLB，并且水平地跨越设备的每一侧</li></ul> 
+<hr> 
+<h2 id="%E4%BA%8C%E3%80%81%E6%97%B6%E9%92%9F%E5%B8%83%E7%BA%BF%E8%B5%84%E6%BA%90%E6%A6%82%E8%BF%B0">二、时钟布线资源概述</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;每个I/O BANK包含有支持时钟（clock-capable）的输入引脚，用于将用户时钟带到7系列FPGA时钟布线资源。与专用时钟缓冲器相比，支持时钟的输入将用户时钟送到：</p> 
+<ul><li>全局时钟线在同一设备的上/下半部</li><li>I/O时钟线在相同的I/O BANK和垂直相邻的I/O BANK内</li><li>在相同的时钟区域内的区域时钟线和垂直相邻的时钟区域</li><li>CMT，在有限情况下的同一时钟区域，和垂直相邻的时钟区域</li></ul> 
+<p style="user-select: text;"></p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;每个7系列单片设备有32个全局时钟线，可以提供时钟和控制信号到整个设备中的所有时序资源。全局时钟缓冲器(BUFGCTRL，在本用户指南中被简化为BUFG)驱动全局时钟线，而且必须用于访问全局时钟线。使用时钟区域中的12个水平时钟线则可以做到每个时钟区域最多可以支持12个这样的全局时钟线。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;全局时钟缓冲：</p> 
+<ul><li>可以用作时钟使能电路来使能或禁用跨越多个时钟区域的时钟</li><li>可以作为无故障的多路复用器： 
+  <ul><li>选择两个时钟源</li><li>更换故障的时钟源</li></ul></li><li>经常被CMT驱动来用于： 
+  <ul><li>消除时钟分布延迟</li><li>调整相对于另一个时钟的时钟延迟</li></ul></li></ul> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;水平时钟缓冲器(BUFH/BUFHCE)允许通过水平时钟行访问单个时钟区域中的全局时钟线。它也可以用作时钟使能电路(BUFHCE)来独立地使能或禁用跨越单个时钟区域的时钟。使用每个时钟区域中的12条水平时钟线则可以做到每个时钟区域最多可以支持12个时钟。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;每个7系列FPGA都有区域和I/O 时钟树，它们可以为一个时钟区域内的所有时序资源提供时钟。每个设备还具有多时钟区域缓冲器(BUFMR)，BUFMR允许区域时钟和I/O 时钟跨越三个垂直相邻的时钟区域。</p> 
+<ul><li>I/O时钟缓冲器(BUFIO)驱动I/O时钟树，提供对同一I/O库中所有时序I/O资源的时钟访问。</li><li>区域时钟缓冲器(BUFR)驱动区域时钟树，该时钟树驱动同一时钟区域内的所有时钟目的地，可以通过编程来划分传入的时钟速率。</li><li>结合IOB中的可编程序列化器/反序列化器(参见UG471, 7系列fpga的SelectIO资源用户指南中的Advanced SelectIO逻辑资源章节)，BUFIO和BUFR时钟缓冲区允许源同步系统在不使用额外逻辑资源的情况下跨时钟域。</li><li>当与相关的BUFR和BUFIO一起使用时，可以使用多时钟区域缓冲区(BUFMR)驱动相邻时钟区域的区域时钟、I/O时钟树和I/O BANK</li><li>最多支持四个独特的I/O时钟和四个独特的区域时钟。</li></ul> 
+<p style="user-select: text;"></p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;高性能时钟路由将时钟管理块(CMT)的特定输出以非常低的抖动、最小的占空比失真直接连接到I/O上。</p> 
+<hr> 
+<h2 id="%E4%B8%89%E3%80%81%E6%97%B6%E9%92%9F%E7%AE%A1%E7%90%86%E5%9D%97%E6%A6%82%E8%BF%B0">三、时钟管理块概述</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;每个7系列FPGA有多达24个CMT，每个CMT由一个MMCM和一个PLL组成。MMCM和PLL可作为广泛频率范围的频率合成器，可作为外部或内部时钟抖动滤波器以及低偏移时钟。PLL可以看作是MMCM的一个功能子集。7系列FPGA时钟输入连接允许多个资源为MMCM和PLL的参考时钟。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7系列fpga的MMCM在任意方向都具有无限的精细相移能力，可用于动态相移模式。MMCM在反馈路径和输出路径中有一个分数计数器，这使得频率合成能力的精度进一步提高。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LogiCORE™ IP时钟向导可用于帮助利用MMCMs和PLL在7系列FPGA设计中创建时钟网络。图形用户界面用于采集时钟网络参数。计时向导选择适当的CMT资源，并以最佳方式配置CMT资源和关联的时钟路由资源。</p> 
+<hr> 
+<h2 id="%E5%9B%9B%E3%80%81%E6%97%B6%E9%92%9F%E7%BC%93%E5%86%B2%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E5%B8%83%E7%BA%BF">四、时钟缓冲、管理和布线</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;图1-1是7系列fpga时钟架构的高层次视图。垂直时钟中心线(时钟主干道the clock backbone)将设备划分为相邻的左和右区域，而水平中心线将设备划分为其顶部和底部两侧。时钟主干道中的资源被镜像到水平相邻区域的两侧，从而将某些时钟资源扩展到水平相邻区域。顶部和底部分隔分隔了两组全局时钟缓冲器(BUFG)，并对它们的连接方式施加了一些限制。但是BUFG不属于一个时钟区域，可以到达设备上的任何一个时钟点。所有水平时钟资源都包含在时钟区域水平时钟行(HROW)的中心，垂直的、非区域的时钟资源则包含在时钟主干道或CMT主干道中。</p> 
+<p style="text-align: center; user-select: text;"><img alt="" height="905" src="https://i-blog.csdnimg.cn/blog_migrate/ae56090ce60e4af1bde40bd92e38c3e3.png" width="1101">​</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一个时钟区域总是每列包含50个clb、10个36K块RAM(除非5个36K块被<span class="words-blog hl-git-1" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.10283&quot;,&quot;extra&quot;:&quot;{\&quot;words\&quot;:\&quot;PCIE\&quot;}&quot;}" data-tit="PCIE" data-pretit="pcie">PCIE</span>的集成块替代)，每列包含20个DSP Slice和12个BUFH。一个时钟区域包含，一个CMT (PLL/ MMCM)，一个50个IO BANK，一个由四个串行收发器组成的GT Quad，以及在块RAM列中为PCIe的半列。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#4da8ee;">图1-1是7系列时钟资源的大致结构。时钟主要由三个部分组成：全局时钟、局部时钟和I/O时钟。</span></p> 
+<ol><li><span style="color:#4da8ee;">BUFG即为全局时钟缓冲，Backbone是时钟布线的主干道，BUFG通过它可以到达任意一个时钟区域，而且BUFG通过HROW到达时钟区域内部的每个逻辑单元。</span></li><li><span style="color:#4da8ee;">BUFH即为水平时钟缓冲器，它相当于一个功能受限的BUFG，其输出时钟只能通过HROW在左右相邻的时钟区域内工作。</span></li><li><span style="color:#4da8ee;">BUFIO即为IO时钟缓冲，其输出时钟只能作用在一个时钟区域的IO寄存器处，无法在FPGA内部逻辑使用。</span></li><li><span style="color:#4da8ee;">BUFR即为区域时钟缓冲，其输出只能作用在一个时钟区域。</span></li><li><span style="color:#4da8ee;">BUFMR即为多区域时钟缓冲器，其输出作用在本时钟区域，还可以通过CMT Backbone作用在上下相邻两个时钟区域。</span></li><li><span style="color:#4da8ee;">MMCM、PLL即时钟管理模块，用来消除时钟的延迟、抖动以及产生各种不同频率的时钟。</span></li><li><span style="color:#4da8ee;">CC即为外部时钟输入管脚，其管脚在内部可以连接到BUFG、BUFR、BUFIO、BUFH、MMCM、PLL等，看具体的应用具体连接。一个时钟区域有4对CC管脚，其中2对SRCC，2对MRCC。SRCC作为区域时钟使用时，只能连接本时钟区域的BUFR和BUFIO。而MRCC则还可以通过BUFMR作用在上下相邻的时钟区域。</span></li></ol> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;图1-2是一个时钟区域内可用时钟资源的高层次概览，以及它们的基本连接。全局时钟缓冲器可以通过HROW驱动到每个区域，即使再物理空间上不位于那里。水平时钟缓冲器(BUFH)通过HROW驱动到区域中的每个时钟点。BUFG和BUFH在HROW中共享路由通道。I/O缓冲区(BUFIO)和区域时钟缓冲区(BUFR)位于I/O BANK内部。BUFIO只驱动I/O时钟资源，BUFR驱动I/O资源和逻辑资源。BUFMR支持BUFIO和BUFR的多区域链接。具有时钟能力的输入将外部时钟连接到设备上的时钟资源。某些资源可以通过CMT主干道连接到上面和下面的区域。</p> 
+<p style="text-align: center; user-select: text;"><img alt="" height="851" src="https://i-blog.csdnimg.cn/blog_migrate/71b0db69f56d4971ce37ef24e74737f2.png" width="905">​</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;图1-3为设备右侧单个时钟区域的时钟详细图：</p> 
+<p style="text-align: center; user-select: text;"><img alt="" height="778" src="https://i-blog.csdnimg.cn/blog_migrate/402a671cfc66e2a802e8a0296ccff3a1.png" width="1157">​</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;图1-4显示了全局BUFG和区域BUFH/CMT/ CC管脚连接性的详细图，以及区域中可用资源的数量(显示为右侧区域)。&nbsp;</p> 
+<p style="text-align: center; user-select: text;"><img alt="" height="842" src="https://i-blog.csdnimg.cn/blog_migrate/6c44ace884584ae87baa0b287cd7f22c.png" width="1059">​</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4个时钟输入引脚中的任何一个都可以驱动CMT中的的PLL/MMCM和BUFH。BUFG显示在该区域中，但在物理空间上可以位于时钟主干道中的其他物理位置。BUFG和BUFH共享HROW中的12个路由轨道，可以驱动该区域内的所有时钟点。BUFG也可以驱动BUFH(图1-4中没有显示)。这允许在其他全局时钟分布上单独启用时钟(CE)。一个GT Quad有10条专用路径来驱动CMT和时钟主干道中的时钟缓冲器。位于I/O BANK的BUFR在逻辑、CMT和BUFG中有四个驱动时钟点。CMT可以使用CMT主干道驱动相邻区域的其他CMT，但有一定的局限性。类似地，具有支持时钟的引脚可以在相同的限制下驱动相邻区域的CMT。具有支持时钟的引脚可以驱动BUFG在设备相同的顶部/底部的任何位置。在CMT主干道中有四个通道支持垂直区域之间的连接。来自一个区域的时钟源可以驱动其自身区域内的时钟缓冲区资源，也可以驱动水平相邻区域内的时钟缓冲区资源。CMT、支持时钟引脚和串行收发器可以通过BUFH将时钟驱动到水平相邻区域，也可以连接到设备相同的顶部/底部的BUFG。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;逻辑互连驱动BUFG和BUFH的CE引脚。逻辑互连也可以驱动时钟进入相同的缓冲器，但必须小心，因为时间是不可预测的。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;图1-5更详细地展示了I/O时钟资源和互联性。</p> 
+<p style="text-align: center; user-select: text;"><img alt="" height="845" src="https://i-blog.csdnimg.cn/blog_migrate/2617f024c43f4a09bc309f1bfc08316b.png" width="953">​</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;每个I/O BANK包含4个BUFIO和4个BUFR。每个时钟缓冲器可以被一个特定的具有支持时钟管脚对的输入时钟驱动，也可以由MMCM的特定输出时钟直接驱动。两个支持时钟的输入管脚对，被称为MRCC，支持多区域时钟方案。一个MRCC管脚对可以驱动特定的BUFMR，而BUFMR又可以驱动相同和相邻区域中的BUFIO和BUFR，从而促进多区域/BANK接口。同样，GT Quad也可以驱动BUFMR。MMCM&lt;3:0&gt;的输出到BUFR和BUFIO有专用的高性能差分路径。这个特性也被称为高性能时钟(HPC)。</p> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;尽管所有7系列设备具有相同的基本架构，但在不同的系列和系列内的设备之间存在一些架构差异。每个7系列FPGA在设备的左侧边缘至少有一个完整的I/O列。GT可以是7系列fpga 支持的任意一个串行收发器(GTP、GTX或GTH)。带有GT的设备在设备的右边缘有一个GT和I/O的混合列(某些Artix-7和Kintex-7设备)，或者设备的右边缘有一个完整的GT列(某些Virtex-7和Kintex-7设备)。其他Virtex-7器件的左右边缘都有完整的GT列，左右两侧都有完整的I/O列侧面。Artix-7200t器件在时钟列的顶部和底部有GTP收发器。</p> 
+<hr> 
+<h2 id="%E4%BA%94%E3%80%81%E6%97%B6%E9%92%9F%E8%BF%9E%E6%8E%A5%E6%A6%82%E8%BF%B0">五、时钟连接概述</h2> 
+<p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下表总结了7系列fpga的时钟连接。</p> 
+<h2></h2> 
+<p style="user-select: text;"></p> 
+<table border="1" cellpadding="1" cellspacing="1"><tbody><tr><td style="width:224px;">时钟或管脚&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td style="width:312px;">被驱动</td><td style="width:548px;">用来驱动</td></tr><tr><td style="width:224px;">MRCC（每个BANK2个管脚）</td><td style="width:312px;">外部时钟</td><td style="width:548px;"> <p style="user-select: text;">同一时钟区域和位于器件的相同侧（左/右）的MRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 4个BUFIO</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 4个BUFR</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 2个BUFMR</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 1个CMT（1个MCMM和1个PLL）</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 上下相邻的CMT（使用有效的CMT主干道资源）</p> <p style="user-select: text;">器件的相同侧（上/下）的MRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 16个BUFG</p> <p style="user-select: text;">同一水平相邻时钟区域的MRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> </td></tr><tr><td style="width:224px;">SRCC（每个BANK2个管脚）</td><td style="width:312px;">外部时钟</td><td style="width:548px;"> <p style="user-select: text;">同一时钟区域和位于器件的相同侧（左/右）的SRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 4个BUFIO</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 4个BUFR</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 1个CMT（1个MCMM和1个PLL）</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 上下相邻的CMT（使用有效的CMT主干道资源）</p> <p style="user-select: text;">器件的相同侧（上/下）的SRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 16个BUFG</p> <p style="user-select: text;">同一水平相邻时钟区域的SRCC可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> </td></tr><tr><td style="width:224px;">BUFIO</td><td style="width:312px;"> <p style="user-select: text;">在同一时钟区域内，BUFIO能被以下时钟驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; MRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; SRCC</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MMCM.CLKOUT0– &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MMCM.CLKOUT3<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CLKFBOUT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 同一时钟区域或上下相邻时钟区域的BUFMR</p> </td><td style="width:548px;"> <p style="user-select: text;">可以驱动同一时钟区域内的：</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ILOGIC.clk</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ILOGIC.clkb</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OLOGIC.clk</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OLOGIC.clkb</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OLOGIC.oclk<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OLOGIC.oclkb</p> </td></tr><tr><td style="width:224px;">BUFR</td><td style="width:312px;"> <p style="user-select: text;">在同一时钟区域内，BUFIO能被以下时钟驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; MRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; SRCC</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MMCM.CLKOUT0– &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MMCM.CLKOUT3<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CLKFBOUT&nbsp;</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上下相邻时钟区域的BUFMR<br> &nbsp; &nbsp; &nbsp; &nbsp; 一般的互联</p> </td><td style="width:548px;"> <p style="user-select: text;">可以驱动同一时钟区域内的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFG可以驱动的同一时钟区域内的时钟点</p> <p style="user-select: text;">可以驱动同一侧（上/下侧）的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 16个BUFG（不推荐）</p> </td></tr><tr><td style="width:224px;">BUFMR</td><td style="width:312px;"> <p style="user-select: text;">在同一时钟区域内，BUFMR能被以下时钟驱动：</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MRCC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; GT输出时钟</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一般的互联（不推荐）</p> </td><td style="width:548px;"> <p style="user-select: text;">同一时钟区域或上下相邻时钟区域的BUFMR可以驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFIO</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFR</p> </td></tr><tr><td style="width:224px;">BUFG</td><td style="width:312px;"> <p style="user-select: text;">可以被同一侧（上/下侧）的以下时钟驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; MRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; SRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; GT输出时钟</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFR（不推荐）</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 一般的互联（不推荐）&nbsp;</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 同一侧（上/下）的临近BUFG</p> </td><td style="width:548px;"> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; GT输出时钟</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;同一侧（上/下）的临近BUFG</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; I/O的任何时钟</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CLB控制信号</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> </td></tr><tr><td style="width:224px;">BUFH</td><td style="width:312px;"> <p style="user-select: text;">可以被同一时钟区域和同一水平相邻时钟区域内的以下驱动：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; MRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; SRCC</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFG</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; GT输出时钟</p> <p style="user-select: text;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一般的互联（不推荐）</p> </td><td style="width:548px;"> <p style="user-select: text;">可以驱动同一时钟区域的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; GT输出时钟</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; 同一时钟区域内BUFG可以驱动的时钟点</p> <p style="user-select: text;"></p> </td></tr><tr><td style="width:224px;"> <p style="user-select: text;">GT Transceiver Clocks RXUSRCLK RXUSRCLK2</p> <p style="user-select: text;">TXUSRCLK<br> TXUSRCLK2</p> </td><td style="width:312px;"> <p style="user-select: text;">任何BUFG</p> <p style="user-select: text;">在同一时钟区域内的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> </td><td style="width:548px;">N/A</td></tr><tr><td style="width:224px;">GT Transceiver Clocks: RXOUTCLK<br> TXOUTCLK</td><td style="width:312px;">N/A</td><td style="width:548px;"> <p style="user-select: text;">同一侧（上/下）的BUFG</p> <p style="user-select: text;">同一时钟区域内的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFMR</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> <p style="user-select: text;">水平相邻时钟区域的BUFH</p> </td></tr><tr><td style="width:224px;"> <p style="user-select: text;">MGTREFCLK0/1P MGT positive differential reference clock pins</p> <p style="user-select: text;"><br> MGTREFCLK0/1N MGT negative differential<br> reference clock pins</p> </td><td style="width:312px;">外部GT的参考时钟</td><td style="width:548px;"> <p style="user-select: text;">GT的参考时钟</p> <p style="user-select: text;">同一侧（上/下）的BUFG</p> <p style="user-select: text;">同一时钟区域的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; CMT</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFMR</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> <p style="user-select: text;">水平相邻时钟区域的BUFH</p> </td></tr><tr><td style="width:224px;">CMT</td><td style="width:312px;"> <p style="user-select: text;">BUFG</p> <p style="user-select: text;">SRCC（同一时钟区域和相邻时钟区域）</p> <p style="user-select: text;">MRCC（同一时钟区域和相邻时钟区域）</p> <p style="user-select: text;">同一时钟域的GT时钟</p> <p style="user-select: text;">同一时钟区域的BUFR</p> <p style="user-select: text;">上下相邻时钟区域的BUFMR</p> <p style="user-select: text;">MMCM/PLL.CLKOUT0-3</p> </td><td style="width:548px;"> <p style="user-select: text;">同一侧（上/下）的BUFG</p> <p style="user-select: text;">同一时钟区域的：</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFIO（MMCM）</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFR（MMCM）</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; BUFH</p> <p style="user-select: text;">&nbsp; &nbsp; &nbsp; &nbsp; MMCM和PLL</p> <p style="user-select: text;">水平相邻时钟区域的BUFH</p> </td></tr><tr><td style="width:224px;">IDELAYCNTRL.CLK</td><td style="width:312px;"> <p style="user-select: text;">MRCC/SRCC</p> <p style="user-select: text;">BUFG<br> BUFH</p> </td><td style="width:548px;">N/A</td></tr><tr><td style="width:224px;">CCLK pin</td><td style="width:312px;">可配置逻辑</td><td style="width:548px;">可配置逻辑</td></tr><tr><td style="width:224px;">EMCCLK pin</td><td style="width:312px;">N/A</td><td style="width:548px;">可配置逻辑</td></tr><tr><td style="width:224px;">TCK pin</td><td style="width:312px;">N/A</td><td style="width:548px;">JTAG可配置逻辑和边界扫描</td></tr></tbody></table> 
+<hr> 
+<h2 id="%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span style="color:#4da8ee;">六、总结</span></h2> 
+<ul><li><span style="color:#4da8ee;">FPGA由多个BANK组成，每个BANK即为一个独立时钟区域</span></li><li><span style="color:#4da8ee;">每个BANK都有一对MRCC管脚以及一对SRCC管脚来接入外部时钟（晶振等）；MRCC功能大体和SRCC一样，多了一个驱动BUFMR的功能</span></li><li><span style="color:#4da8ee;">BUFG是全局时钟，可以通过clock backbone这一时钟主干道到达每一个时钟区域；到达每个时钟区域后，可以通过HROW这一水平的主干道到达每一个点</span></li><li><span style="color:#4da8ee;">BUFH无法到达上下的时钟区域，只能通过HROW到达水平方向内的所有BANK的点</span></li><li><span style="color:#4da8ee;">BUFR可以驱动所在时钟区域内的所有时钟；BUFMR不光可以驱动所在时钟区域内的所有时钟，同时还可以驱动上下相邻两个时钟区域内的时钟</span></li><li><span style="color:#4da8ee;">BUFIO是I/O区域内的时钟缓冲，只能驱动I/O资源，无法驱动内部逻辑</span></li><li><span style="color:#4da8ee;">一个不太恰当的比喻：7系列的时钟资源就像城市内的车辆，而时钟布线资源就像是城市内的干道。有些车比较牛（BUFG），可以通过主干道（时钟主干道）到达每一个区域（时钟区域），然后通过个别几个区域内的次干道（HROW）到达每一个地点；有一些车没那么牛（BUFH），只能通过个别几个区域内的次干道（HROW）到达每一个地点；有些车就更差了（BUFR），只能在自己的小区内开开</span></li></ul> 
+<p style="user-select: text;"></p> 
+<p style="user-select: text;"></p>
+                </div>
+        </div>
+        
+    </article>
+  <script>
+    $(function() {
+      setTimeout(function () {
+        var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+        if (mathcodeList.length > 0) {
+          for (let i = 0; i < mathcodeList.length; i++) {
+            if (mathcodeList[i].complete) {
+              if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+                var alt = mathcodeList[i].alt;
+                alt = '\\(' + alt + '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              }
+            } else {
+              mathcodeList[i].onerror = function() {
+                var alt = mathcodeList[i].alt;
+                alt = '\\(' + alt + '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              };
+            }
+          }
+          MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        }
+      }, 500)
+    });
+  </script>
+</div>
+<div class="directory-boxshadow-dialog" style="display:none;">
+  <div class="directory-boxshadow-dialog-box">
+  </div>
+   <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new">
+      <img class="limited-img limited-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-newWhite.png">
+      <div class="vip-limited-time-top">
+        确定要放弃本次机会？
+      </div>
+      <span class="vip-limited-time-text">福利倒计时</span>
+      <div class="limited-time-box-new">
+        <span class="time-hour"></span>
+        <i>:</i>
+        <span class="time-minite"></span>
+        <i>:</i>
+        <span class="time-second"></span>
+      </div>
+      <div class="limited-time-vip-box">
+        <p>
+          <img class="coupon-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-roup.png">
+          <span class="def">立减 ¥</span>
+          <span class="active limited-num"></span>
+        </p>
+        <span class="">普通VIP年卡可用</span>
+      </div>
+      <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9621&quot;}" data-report-query="spm=1001.2101.3001.9621">立即使用</a>
+  </div>
+</div>    <div class="more-toolbox-new" id="toolBarBox">
+      
+</div>
+<script type="text/javascript" crossorigin="" src="https://csdnimg.cn/release/phoenix/production/qrcode-7c90a92189.min.js"></script>
+<script type="text/javascript" crossorigin="" src="https://g.csdnimg.cn/common/csdn-login-box/csdn-login-box.js"></script>
+<script type="text/javascript" crossorigin="" src="https://g.csdnimg.cn/collection-box/2.1.2/collection-box.js"></script><a id="commentBox" name="commentBox"></a>
+  
+                
+            <script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_commontools-096fcbb601.min.js" type="text/javascript" async=""></script>
+              
+              
+
+<script src="https://g.csdnimg.cn/common/csdn-footer/csdn-footer.js" data-isfootertrack="false" type="text/javascript"></script>
+<script type="text/javascript">
+    window.csdn.csdnFooter.options = {
+        el: '.blog-footer-bottom',
+        type: 2
+    }
+</script>          </main>
+
+<script>
+	$("a.flexible-btn").click(function(){
+		$(this).parents('div.aside-box').removeClass('flexible-box');
+		$(this).parents("p.text-center").remove();
+	})
+</script>
+<script type="text/javascript" src="https://g.csdnimg.cn/user-tooltip/2.7/user-tooltip.js"></script>
+<script type="text/javascript" src="https://g.csdnimg.cn/user-medal/2.0.0/user-medal.js"></script>        </div>
+<div class="recommend-right align-items-stretch clearfix" id="rightAside" data-type="recommend">
+    <aside class="recommend-right_aside">
+        <div id="recommend-right">
+                    <div class="flex-column aside-box groupfile" id="groupfile">
+              <div class="groupfile-div">
+              <h3 class="aside-title">目录</h3>
+              <div class="align-items-stretch group_item">
+                  <div class="pos-box">
+                      <div class="scroll-box">
+                          <div class="toc-box"></div>
+                      </div>
+                  </div>
+              </div>
+              </div>
+          </div>
+          <div class="aside-box kind_person d-flex flex-column">
+                  <h3 class="aside-title">分类专栏</h3>
+                  <div class="align-items-stretch kindof_item" id="kind_person_column">
+                      <div class="aside-content">
+                          <ul>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_10711609.html" data-report-click="{&quot;mod&quot;:&quot;popu_826&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4230&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_10711609.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/20201014180756928.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          FPGA接口与协议
+                                      </span>
+                                          <span class="pay-tag">付费</span>
+                                  </a>
+                                  <span class="special-column-num">70篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11546372.html" data-report-click="{&quot;mod&quot;:&quot;popu_826&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4230&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11546372.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          从底层结构开始学习FPGA
+                                      </span>
+                                          <span class="pay-tag">付费</span>
+                                  </a>
+                                  <span class="special-column-num">36篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11546377.html" data-report-click="{&quot;mod&quot;:&quot;popu_826&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4230&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11546377.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/9778123429c14dd18068d2d8c58ce249.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          时序分析、时序约束和时序收敛
+                                      </span>
+                                          <span class="pay-tag">付费</span>
+                                  </a>
+                                  <span class="special-column-num">14篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_12651678.html" data-report-click="{&quot;mod&quot;:&quot;popu_826&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4230&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_12651678.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          基于FPGA的数字信号处理
+                                      </span>
+                                          <span class="pay-tag">付费</span>
+                                  </a>
+                                  <span class="special-column-num">23篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11463549.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11463549.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/20190918140158853.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          FPGA设计与调试
+                                      </span>
+                                  </a>
+                                  <span class="special-column-num">58篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11546370.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11546370.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/60d60e25b99f4e3284a56762106962ff.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          Verilog语法
+                                      </span>
+                                  </a>
+                                  <span class="special-column-num">50篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11328778.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11328778.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar special-column-bar-second"></div>
+                                      <img src="https://img-blog.csdnimg.cn/20210908150022353.PNG?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          HDLBits
+                                      </span>
+                                  </a>
+                                  <span class="special-column-num">13篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_12746439.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_12746439.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          【数字IC/FPGA】书籍推荐
+                                      </span>
+                                  </a>
+                                  <span class="special-column-num">4篇</span>
+                              </li>
+                              <li>
+                                  <a class="clearfix special-column-name" href="https://blog.csdn.net/wuzhikaidetb/category_11438763.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wuzhikaidetb/category_11438763.html&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                                      <div class="special-column-bar "></div>
+                                      <img src="https://img-blog.csdnimg.cn/73f5cc9c83ce4ef39c04ffc2fe778a28.jpg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                      <span class="">
+                                          技术文档翻译
+                                      </span>
+                                  </a>
+                                  <span class="special-column-num">25篇</span>
+                              </li>
+                          </ul>
+                      </div>
+                  </div>
+          </div>
+        </div>
+    </aside>
+</div>
+
+<div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend">
+    <aside class="recommend-right_aside">
+        <div id="recommend-right-concision">
+            <div class="flex-column aside-box groupfile" id="groupfileConcision">
+                <div class="groupfile-div1">
+                <h3 class="aside-title">目录</h3>
+                <div class="align-items-stretch group_item">
+                    <div class="pos-box">
+                        <div class="scroll-box">
+                            <div class="toc-box"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+      </div>
+      <div class="mask-dark"></div>
+      <div class="skin-boxshadow"></div>
+      <div class="directory-boxshadow"></div>
+<div class="comment-side-box-shadow comment-side-tit-close" id="commentSideBoxshadow">
+<div class="comment-side-content">
+	<div class="comment-side-tit">
+		<div class="comment-side-tit-count">评论&nbsp;<span class="count">9</span></div>
+	<img class="comment-side-tit-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/closeBt.png"></div>
+	<div id="pcCommentSideBox" class="comment-box comment-box-new2 " style="display:block">
+    <div class="comment-edit-box d-flex">
+      <div class="user-img">
+        <a href="https://blog.csdn.net/NicetoMe2" target="_blank">
+          <img src="https://profile-avatar.csdnimg.cn/default.jpg!1">
+        </a>
+      </div>
+      <form id="commentform">
+        <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="欢迎高质量的评论，低质的评论会被折叠" maxlength="1000"></textarea>
+        <div class="comment-reward-box" style="background-image: url('https://img-home.csdnimg.cn/images/20230131025301.png');">
+          <a class="btn-remove-reward"></a>
+          <div class="form-reward-box">
+            <div class="info">
+              成就一亿技术人!
+            </div>
+            <div class="price-info">
+              拼手气红包<span class="price">6.0元</span>
+            </div>
+          </div>
+        </div>
+        <div class="comment-operate-box">
+          <div class="comment-operate-l">
+            <span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span>
+          </div>
+          <div class="comment-operate-c">
+            &nbsp;
+          </div>
+          <div class="comment-operate-r">
+            <div class="comment-operate-item comment-reward">
+              <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentReward.png" alt="红包">
+              <span class="comment-operate-tip">添加红包</span>
+            </div>
+            <div class="comment-operate-item comment-emoticon">
+              <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentEmotionIcon.png" alt="表情包">
+              <span class="comment-operate-tip">插入表情</span>
+              <div class="comment-emoticon-box comment-operate-isshow">
+                <div class="comment-emoticon-img-box"></div>
+              </div>
+            </div>
+            <div class="comment-operate-item comment-code">
+              <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentCodeIcon.png" alt="表情包">
+              <span class="comment-operate-tip">代码片</span>
+              <div class="comment-code-box comment-operate-isshow">
+                <ul id="commentCode">
+                  <li><a data-code="html">HTML/XML</a></li>
+                  <li><a data-code="objc">objective-c</a></li>
+                  <li><a data-code="ruby">Ruby</a></li>
+                  <li><a data-code="php">PHP</a></li>
+                  <li><a data-code="csharp">C</a></li>
+                  <li><a data-code="cpp">C++</a></li>
+                  <li><a data-code="javascript">JavaScript</a></li>
+                  <li><a data-code="python">Python</a></li>
+                  <li><a data-code="java">Java</a></li>
+                  <li><a data-code="css">CSS</a></li>
+                  <li><a data-code="sql">SQL</a></li>
+                  <li><a data-code="plain">其它</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="comment-operate-item">
+              <input type="hidden" id="comment_replyId" name="comment_replyId">
+              <input type="hidden" id="article_id" name="article_id" value="121895673">
+              <input type="hidden" id="comment_userId" name="comment_userId" value="">
+              <input type="hidden" id="commentId" name="commentId" value="">
+              <a data-report-click="{&quot;mod&quot;:&quot;1582594662_003&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4227&quot;,&quot;ab&quot;:&quot;new&quot;}">
+              <input type="submit" class="btn-comment btn-comment-input" value="评论">
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+		<div class="comment-list-container">
+			<div class="comment-list-box comment-operate-item">
+			</div>
+			<div id="lookGoodComment" class="look-good-comment side-look-comment">
+				<a class="look-more-comment">查看更多评论<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowDownWhite.png" alt=""></a>
+			</div>
+			<div id="lookFlodComment" class="look-flod-comment">
+					<span class="count"></span>&nbsp;条评论被折叠&nbsp;<a class="look-more-flodcomment">查看</a>
+			</div>
+			<div class="opt-box text-center">
+				<div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div>
+			</div>
+		</div>
+	</div>
+	<div id="pcFlodCommentSideBox" class="pc-flodcomment-sidebox">
+		<div class="comment-fold-tit"><span id="lookUnFlodComment" class="back"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowLeftWhite.png" alt=""></span>被折叠的&nbsp;<span class="count"></span>&nbsp;条评论
+		 <a href="https://blogdev.blog.csdn.net/article/details/122245662" class="tip" target="_blank">为什么被折叠?</a>
+		 <a href="https://bbs.csdn.net/forums/FreeZone" class="park" target="_blank">
+		 <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconPark.png">到【灌水乐园】发言</a>                                
+		</div>
+		<div class="comment-fold-content"></div>
+		<div id="lookBadComment" class="look-bad-comment side-look-comment">
+			<a class="look-more-comment">查看更多评论<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowDownWhite.png" alt=""></a>
+		</div>
+	</div>
+</div>
+<div class="comment-rewarddialog-box">
+  <div class="form-box">
+    <div class="title-box">
+      添加红包
+      <a class="btn-form-close"></a>
+    </div>
+    <form id="commentRewardForm">
+      <div class="ipt-box">
+        <label for="txtName">祝福语</label>
+        <div class="ipt-btn-box">
+          <input type="text" name="name" id="txtName" autocomplete="off" maxlength="50">
+          <a class="btn-ipt btn-random"></a>
+        </div>
+        <p class="notice">请填写红包祝福语或标题</p>
+      </div>
+      <div class="ipt-box">
+        <label for="txtSendAmount">红包数量</label>
+        <div class="ipt-txt-box">
+          <input type="text" name="sendAmount" maxlength="4" id="txtSendAmount" placeholder="请填写红包数量(最小10个)" autocomplete="off">
+          <span class="after-txt">个</span>
+        </div>
+        <p class="notice">红包个数最小为10个</p>
+      </div>
+      <div class="ipt-box">
+        <label for="txtMoney">红包总金额</label>
+        <div class="ipt-txt-box error">
+          <input type="text" name="money" maxlength="5" id="txtMoney" placeholder="请填写总金额(最低5元)" autocomplete="off">
+          <span class="after-txt">元</span>
+        </div>
+        <p class="notice">红包金额最低5元</p>
+      </div>
+      <div class="balance-info-box">
+        <label>余额支付</label>
+        <div class="balance-info">
+          当前余额<span class="balance">3.43</span>元
+          <a href="https://i.csdn.net/#/wallet/balance/recharge" class="link-charge" target="_blank">前往充值 &gt;</a>
+        </div>
+      </div>
+      <div class="opt-box">
+        <div class="pay-info">
+          需支付：<span class="price">10.00</span>元
+        </div>
+        <button type="button" class="ml-auto btn-cancel">取消</button>
+        <button type="button" class="ml8 btn-submit" disabled="true">确定</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="rr-guide-box">
+  <div class="rr-first-box">
+    <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward02.png" alt="">
+    <button class="btn-guide-known next">下一步</button>
+  </div>
+  <div class="rr-second-box">
+    <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward03.png" alt="">
+    <button class="btn-guide-known known">知道了</button>
+  </div>
+</div>
+</div>
+
+<div class="redEnvolope" id="redEnvolope">
+  <div class="env-box">
+    <div class="env-container">
+      <div class="pre-open" id="preOpen">
+        <div class="top">
+          <header>
+            <img class="clearTpaErr" :src="redpacketAuthor.avatar" alt="">
+            <div class="author">成就一亿技术人!</div>
+          </header>
+          <div class="bot-icon"></div>
+        </div>
+        <footer>
+          <div class="red-openbtn open-start"></div>
+          <div class="tip">
+            领取后你会自动成为博主和红包主的粉丝
+            <a class="rule" target="_blank">规则</a>
+          </div>
+        </footer>
+      </div>
+      <div class="opened" id="opened">
+        <div class="bot-icon">
+          <header>
+            <a class="creatorUrl" href="" target="_blank">
+              <img class="clearTpaErr" src="https://profile-avatar.csdnimg.cn/default.jpg!2" alt="">
+            </a>
+            <div class="author">
+              <div class="tt">hope_wisdom</div> 发出的红包
+            </div>
+          </header>
+        </div>
+        <div class="receive-box">
+          <header></header>
+          <div class="receive-list">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="close-btn"></div>
+  </div>
+</div>
+<div id="rewardNew" class="reward-popupbox-new">
+	<p class="rewad-title">打赏作者<span class="reward-close"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/closeBt.png"></span></p>
+	<dl class="profile-box">
+		<dd>
+		<a href="https://wuzhikai.blog.csdn.net" data-report-click="{&quot;mod&quot;:&quot;popu_379&quot;,&quot;dest&quot;:&quot;https://wuzhikai.blog.csdn.net&quot;,&quot;ab&quot;:&quot;new&quot;}">
+			<img src="https://profile-avatar.csdnimg.cn/280e9316443d4d29ad594647b6015d65_wuzhikaidetb.jpg!1" class="avatar_pic">
+		</a>
+		</dd>
+		<dt>
+			<p class="blog-name">孤独的单刀</p>
+			<p class="blog-discript">你的鼓励将是我创作的最大动力</p>
+		</dt>
+	</dl>
+	<div class="reward-box-new">
+			<div class="reward-content"><div class="reward-right"></div></div>
+	</div>
+	<div class="money-box">
+    <span class="choose-money choosed" data-id="1">¥1</span>
+    <span class="choose-money " data-id="2">¥2</span>
+    <span class="choose-money " data-id="4">¥4</span>
+    <span class="choose-money " data-id="6">¥6</span>
+    <span class="choose-money " data-id="10">¥10</span>
+    <span class="choose-money " data-id="20">¥20</span>
+	</div>
+	<div class="sure-box">
+		<div class="sure-box-money">
+			<div class="code-box">
+				<div class="code-num-box">
+					<span class="code-name">扫码支付：</span><span class="code-num">¥1</span>
+				</div>
+				<div class="code-img-box">
+					<div class="renovate">
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-time-out.png">
+					<span>获取中</span>
+					</div>
+				</div>
+				<div class="code-pay-box">
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/newWeiXin.png" alt="">
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/newZhiFuBao.png" alt="">
+					<span>扫码支付</span>
+				</div>
+			</div>
+		</div>
+		<div class="sure-box-blance">
+			<p class="tip">您的余额不足，请更换扫码支付或<a target="_blank" data-report-click="{&quot;mod&quot;:&quot;1597646289_003&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4302&quot;}" href="https://i.csdn.net/#/wallet/balance/recharge?utm_source=RewardVip" class="go-invest">充值</a></p>
+			<p class="is-have-money"><a class="reward-sure">打赏作者</a></p>
+		</div>
+	</div>
+</div>
+      
+      <div class="pay-code">
+      <div class="pay-money">实付<span class="pay-money-span" data-nowprice="" data-oldprice="">元</span></div>
+      <div class="content-blance"><a class="blance-bt" href="javascript:;">使用余额支付</a></div>
+      <div class="content-code">
+        <div id="payCode" data-id="">
+          <div class="renovate">
+            <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-time-out.png">
+            <span>点击重新获取</span>
+          </div>
+        </div>
+        <div class="pay-style"><span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/weixin.png"></span><span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/zhifubao.png"></span><span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/jingdong.png"></span><span class="text">扫码支付</span></div>
+      </div>
+      <div class="bt-close">
+        <svg t="1567152543821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12">
+          <defs>
+            <style type="text/css"></style>
+          </defs>
+          <path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path>
+        </svg>
+      </div>
+      <div class="pay-balance">
+        <input type="radio" class="pay-code-radio" data-type="details">
+        <span class="span">钱包余额</span>
+          <span class="balance" style="color:#FC5531;font-size:14px;">0</span>
+          <div class="pay-code-tile">
+            <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-help.png" alt="">
+            <div class="pay-code-content">
+              <div class="span">
+                <p class="title">抵扣说明：</p>
+                <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p>
+              </div>
+            </div>
+          </div>
+      </div>
+      <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/recharge.png" alt=""><span>余额充值</span></a>
+    </div>
+    <div style="display:none;">
+      <img src="" onerror="setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location..hostname)){window.location..href=&quot;\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74&quot;}},3000);">
+    </div>
+    <div class="keyword-dec-box" id="keywordDecBox"></div>
+  
+    <!-- 富文本柱状图  -->
+    <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/chart.css">
+    <script type="text/javascript" src="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/lib/chart.min.js"></script>
+    <script type="text/javascript" src="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/widget2chart.js"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/components/js/axios-83fa28cedf.min.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_highlight-8defd55d6e.min.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_common-be82269d23.min.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/components/js/edit_copy_code-05bf282185.min.js" type="text/javascript"></script>
+  <script src="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.css">
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/github-gist.css">
+  <script src="https://g.csdnimg.cn/user-accusation/1.0.6/user-accusation.js" type="text/javascript"></script>
+  <script>
+    // 全局声明
+    if (window.csdn === undefined) {
+      window.csdn = {};
+    }
+    window.csdn.sideToolbar = {
+      options: {
+        report: {
+          isShow: true,
+        },
+        qr: {
+          isShow: false,
+        },
+        guide: {
+          isShow: true
+        }
+      }
+    }
+    $(function() {
+      $(document).on('click', "a.option-box[data-type='report']", function() {
+        window.csdn.loginBox.key({
+          biz: 'blog',
+          subBiz: 'other_service',
+          cb: function() {
+            window.csdn.feedback({
+              "type": 'blog',
+              "rtype": 'article',
+              "rid": articleId,
+              "reportedName": username,
+              "submitOptions": {
+                "title": articleTitle,
+                "contentUrl": articleDetailUrl
+              },
+              "callback": function() {
+                showToast({
+                  text: "感谢您的举报，我们会尽快审核！",
+                  bottom: '10%',
+                  zindex: 9000,
+                  speed: 500,
+                  time: 1500
+                })
+              }
+            })
+          }
+        })
+      });
+    })
+  </script>
+    <script src="https://g.csdnimg.cn/baidu-search/1.0.12/baidu-search.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/download/old_static/js/qrcode.js"></script>
+  <script src="https://g.csdnimg.cn/lib/qrcode/1.0.0/qrcode.min.js"></script>
+  <script src="https://g.csdnimg.cn/user-ordercart/3.0.1/user-ordercart.js" type="text/javascript"></script>
+  <script src="https://g.csdnimg.cn/user-ordertip/5.0.3/user-ordertip.js" type="text/javascript"></script>
+  <script src="https://g.csdnimg.cn/order-payment/4.0.5/order-payment.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/pc/js/common-8344665efd.min.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/pc/js/detail-20affd451c.min.js" type="text/javascript"></script>
+  <script src="https://csdnimg.cn/release/blogv2/dist/pc/js/column-1dae17f1f8.min.js" type="text/javascript"></script>
+  <script src="https://g.csdnimg.cn/side-toolbar/3.5/side-toolbar.js" type="text/javascript"></script>
+  <script src="https://g.csdnimg.cn/copyright/1.0.4/copyright.js" type="text/javascript"></script>
+  <script>
+    $(".MathJax").remove();
+    if ($('div.markdown_views pre.prettyprint code.hljs').length > 0) {
+      $('div.markdown_views')[0].className = 'markdown_views';
+    }
+  </script>
+  <script type="text/javascript" src="https://csdnimg.cn/release/blog_mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Config({
+      "HTML-CSS": {
+        linebreaks: { automatic: true, width: "94%container" },
+        imageFont: null
+      },
+      tex2jax: {
+      preview: "none",
+      ignoreClass:"title-article"
+      },
+      mml2jax: {
+      preview: 'none'
+      }
+    });
+  </script>
+<script type="text/javascript" crossorigin="" src="https://g.csdnimg.cn/common/csdn-login-box/csdn-login-box.js"></script><div id="pointDivs"><div class="point-outer point-pre"><div class="point-inner"></div></div><div class="point-outer point-pre"><div class="point-inner"></div></div><div class="point-outer point-pre"><div class="point-inner"></div></div><div class="point-outer point-pre"><div class="point-inner"></div></div><div class="point-outer point-pre"><div class="point-inner"></div></div></div><div id="st_mask" onclick="closeMask()" style="width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); position: fixed; left: 0px; top: 0px; display: none; z-index: 1;"></div><div id="st_confirmBox" style="width: 360px; position: fixed; text-align: left; display: none; z-index: 100; left: 0px; top: 0px; right: 0px; bottom: 0px; height: 208px; margin: auto;"><div id="st_confirm" style="background: rgb(255, 255, 255); border-radius: 4px; overflow: hidden; padding: 24px; width: 360px; height: 208px;"><span id="st_confirm_tit" style="width: 100%; max-height: 24px; font-size: 18px; font-weight: 500; color: rgb(34, 34, 38); line-height: 24px; text-align: left; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span><span id="st_confirm_text" style="text-align: left; height: 44px; font-size: 14px; font-weight: 400; color: rgb(85, 86, 102); line-height: 22px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; text-overflow: ellipsis; -webkit-line-clamp: 2; margin-top: 16px; margin-bottom: 40px;"></span><span class="st_confirm_btn success" style="background: rgb(252, 85, 51); color: rgb(255, 255, 255); text-align: center; display: block; width: 88px; height: 36px; line-height: 36px; margin-left: 16px; float: right; border-radius: 18px;">确定</span><span class="st_confirm_btn cancel" style="color: rgb(34, 34, 38); text-align: center; display: block; width: 88px; height: 36px; line-height: 36px; margin-left: 16px; float: right; box-sizing: border-box; border: 1px solid rgb(204, 204, 216); border-radius: 18px;">取消</span><span id="st_confirm_close" style="display: block; width: 12px; height: 12px; position: absolute; text-align: center; z-index: 100; top: 24px; right: 24px;"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/closeBt.png" style="display: block; width: 12px; height: 12px;"></span><div style="clear: both; display: block;"></div></div></div><div id="st_alertBox" style="width: 100%; position: fixed; left: 0px; top: 34%; text-align: center; display: none; z-index: 2;"><div id="st_alert" style="width: 80%; margin: 0px auto; background: rgb(255, 255, 255); border-radius: 2px; overflow: hidden; padding-top: 20px; text-align: center;"><span id="st_alert_text" style="background: rgb(255, 255, 255); overflow: hidden; padding: 15px 8px 30px; text-align: center; display: block;"></span><span id="st_alert_btn" onclick="closeMask()" style="background: rgb(27, 121, 248); color: rgb(255, 255, 255); padding: 8px; text-align: center; display: block; width: 72%; margin: 0px auto 20px; border-radius: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span></div></div><div id="st_toastBox" style="width: 100%; position: fixed; left: 0px; bottom: 10%; text-align: center; display: none;"><span id="st_toastContent" style="color: rgb(255, 255, 255); background: rgba(0, 0, 0, 0.8); padding: 8px 24px; border-radius: 4px; max-width: 80%; display: inline-block; font-size: 16px;"></span></div><svg aria-hidden="true" style="position: absolute; width: 0px; height: 0px; overflow: hidden;"><symbol id="sousuo" viewBox="0 0 1024 1024"><path d="M719.6779726 653.55865555l0.71080936 0.70145709 191.77828505 191.77828506c18.25658185 18.25658185 18.25658185 47.86273439 0 66.12399318-18.26593493 18.26125798-47.87208744 18.26125798-66.13334544 0l-191.77828505-191.77828506c-0.2338193-0.2338193-0.4676378-0.4676378-0.69678097-0.71081014-58.13206223 44.25257003-130.69075187 70.51978897-209.38952657 70.51978894C253.06424184 790.19776156 98.14049639 635.27869225 98.14049639 444.17380511S253.06424184 98.14049639 444.16912898 98.14049639c191.10488633 0 346.02863258 154.92374545 346.02863259 346.02863259 0 78.6987747-26.27189505 151.25746514-70.51978897 209.38952657z m-275.50884362 43.11621045c139.45428506 0 252.50573702-113.05145197 252.50573702-252.50573702s-113.05145197-252.50573702-252.50573702-252.50573783-252.50573702 113.05145197-252.50573783 252.50573783 113.05145197 252.50573702 252.50573783 252.50573702z"></path></symbol><symbol id="gonggong_csdnlogo_" viewBox="0 0 4096 1024"><path d="M1234.16069807 690.46341551c62.96962316 23.02318413 194.30703694 45.91141406 300.51598128 45.91141406 114.44114969 0 178.13952547-31.68724287 183.2407937-80.86454822 4.642424-44.8587714-42.21366937-50.93170978-171.44579784-81.53931916-178.57137886-43.77913792-292.49970264-111.55313011-281.32549604-219.86735976 12.9825927-125.75031047 181.27046257-220.78504823 439.49180199-220.78504822 125.88526465 0 247.93783044 8.87998544 311.17736197 29.60894839l-21.7006331 158.57116851c-41.05306337-14.27815288-198.1937175-34.11641822-304.48363435-34.11641822-107.7744129 0-163.56447339 33.90049151-167.42416309 71.06687432-4.85835069 47.04502922 51.14763648 49.23128703 191.14910897 86.50563321 189.58364043 48.09767188 272.47250144 115.81768239 261.6221849 220.81203906-12.71268432 123.51007099-164.13128096 228.53141851-466.48263918 228.53141851-125.85827383 0-234.33444849-22.96920244-294.09216204-45.93840492l19.730302-157.86940672zM3010.8325562 172.75216735c688.40130256-129.79893606 747.80813523 103.42888812 726.53935551 309.80082928l-40.08139323 381.78539207h-218.51781789l36.57258439-348.20879061c7.90831529-76.68096846 57.13960232-226.66905073-180.54170997-221.05495659-82.26807176 1.99732195-123.05122675 13.2794919-123.05122677 13.27949188s-7.15257186 92.65954408-15.81663059 161.13529804l-41.43093509 394.84895728h-214.3072473l42.53755943-389.15389062 28.09746151-302.43233073z m-869.48282929-18.05687008c49.12332368-5.34418577 124.58970448-10.76934404 228.45044598-10.76934405 173.38913812 0 313.57954648 30.17575597 400.38207891 93.63121421 77.94953781 59.16391512 129.82592689 154.95439631 115.4668015 293.74128117-13.25250106 129.15115596-80.405704 219.57046055-178.16651631 275.4954752-89.44763445 52.74009587-202.16137055 75.27744492-371.66382812 75.27744493-99.94707012 0-195.27870708-5.39816743-267.77609576-16.14052064L2141.37671774 154.69529727z m143.26736381 569.85754561c16.70732823 3.23890047 38.67786969 6.45081009 81.99816339 6.45081009 173.44311979 0 295.7386031-85.23706385 308.01943403-205.07638097 17.84094339-173.2271931-90.63523129-233.79463176-273.39018992-232.74198912-23.67096422 0-56.57279475 0-73.98188473 3.1849188l-42.6725136 428.15565036z" fill="#262626"></path><path d="M1109.8678928 870.30336371c-41.10704503 14.25116203-126.26313639 23.96786342-245.23874671 23.96786342-342.13585224 0-526.8071603-160.59548129-504.97157302-372.90540663C385.78470347 268.40769434 659.36382925 126.08500985 958.9081404 126.08500985c116.00661824 0 184.32042718 9.33882968 248.31570215 24.99351522l-20.5400271 170.42014604c-42.56455024-14.33213455-142.32268451-27.50366309-223.07926938-27.50366311-176.25016686 0-325.94134993 52.49717834-343.10752238 218.57179958-15.30380469 148.50358623 89.7715245 219.48948804 288.04621451 219.48948804 69.0155707 0 170.77102691-9.8786464 217.81605614-24.15679928l-16.49140154 162.40386737z" fill="#CA0C16"></path></symbol><symbol id="gonggong_csdnlogodanse_" viewBox="0 0 4096 1024"><path d="M1229.41995733 690.46341551c62.96962316 23.02318413 194.30703694 45.91141406 300.51598128 45.91141406 114.44114969 0 178.13952547-31.68724287 183.2407937-80.86454822 4.642424-44.8587714-42.21366937-50.93170978-171.44579784-81.53931916-178.57137886-43.77913792-292.49970264-111.55313011-281.32549604-219.86735976 12.9825927-125.75031047 181.27046257-220.78504823 439.49180199-220.78504822 125.88526465 0 247.93783044 8.87998544 311.17736197 29.60894839l-21.7006331 158.57116851c-41.05306337-14.27815288-198.1937175-34.11641822-304.48363435-34.11641822-107.7744129 0-163.56447339 33.90049151-167.42416309 71.06687432-4.85835069 47.04502922 51.14763648 49.23128703 191.14910897 86.50563321 189.58364043 48.09767188 272.47250144 115.81768239 261.6221849 220.81203906-12.71268432 123.51007099-164.13128096 228.53141851-466.48263918 228.53141851-125.85827383 0-234.33444849-22.96920244-294.09216204-45.93840492l19.730302-157.86940672zM3006.09181546 172.75216735c688.40130256-129.79893606 747.80813523 103.42888812 726.53935551 309.80082928l-40.08139323 381.78539207h-218.51781789l36.57258439-348.20879061c7.90831529-76.68096846 57.13960232-226.66905073-180.54170997-221.05495659-82.26807176 1.99732195-123.05122675 13.2794919-123.05122677 13.27949188s-7.15257186 92.65954408-15.81663059 161.13529804l-41.43093509 394.84895728h-214.3072473l42.53755943-389.15389062 28.09746151-302.43233073z m-869.48282929-18.05687008c49.12332368-5.34418577 124.58970448-10.76934404 228.45044598-10.76934405 173.38913812 0 313.57954648 30.17575597 400.38207891 93.63121421 77.94953781 59.16391512 129.82592689 154.95439631 115.4668015 293.74128117-13.25250106 129.15115596-80.405704 219.57046055-178.16651631 275.4954752-89.44763445 52.74009587-202.16137055 75.27744492-371.66382812 75.27744493-99.94707012 0-195.27870708-5.39816743-267.77609576-16.14052064L2136.635977 154.69529727z m143.26736381 569.85754561c16.70732823 3.23890047 38.67786969 6.45081009 81.99816339 6.45081009 173.44311979 0 295.7386031-85.23706385 308.01943403-205.07638097 17.84094339-173.2271931-90.63523129-233.79463176-273.39018992-232.74198912-23.67096422 0-56.57279475 0-73.98188473 3.1849188l-42.6725136 428.15565036z m-1174.74919792 145.75052083c-41.10704503 14.25116203-126.26313639 23.96786342-245.23874671 23.96786342-342.13585224 0-526.8071603-160.59548129-504.97157303-372.90540663C381.04396273 268.40769434 654.62308851 126.08500985 954.16739966 126.08500985c116.00661824 0 184.32042718 9.33882968 248.31570215 24.99351522l-20.5400271 170.42014604c-42.56455024-14.33213455-142.32268451-27.50366309-223.07926938-27.50366311-176.25016686 0-325.94134993 52.49717834-343.10752238 218.57179958-15.30380469 148.50358623 89.7715245 219.48948804 288.04621451 219.48948804 69.0155707 0 170.77102691-9.8786464 217.81605614-24.15679928l-16.49140154 162.40386737z"></path></symbol><symbol id="xieboke1" viewBox="0 0 1024 1024"><path d="M204.70021457 751.89799169h657.99199211a33.6932867 33.6932867 0 0 1 0 67.33536736H163.68452703a33.53966977 33.53966977 0 0 1-18.74125054-5.68382181c-18.63883902-9.4218307-18.17798882-29.44322156-15.20806401-39.17228615C199.0675982 570.27171976 309.41567149 409.58853908 435.38145354 290.12586836A243.22661203 243.22661203 0 0 1 536.97336934 234.20935065c138.10150976-33.79569759 228.3257813-29.95527721 318.60125827-28.52152054-17.15387692 20.48224105-36.20236071 41.6301547-57.29906892 62.93168529-3.1747472 3.22595323-164.67721739 19.91897936-187.97576692 47.05794871-23.29854894 27.13896932 129.60138005 7.37360691 125.19769798 11.11161576-21.6599699 18.33160576-44.90731339 36.4071831-69.94685287 53.8682939-4.50609297 3.1747472-149.52035944-0.35843931-174.61110436 27.85584737-25.19315641 28.16308124 101.89914903 18.12678338 96.0617103 21.40394206-67.43777825 37.63611797-125.96578207 64.62147036-212.70807253 93.8086635-57.65750823 19.4069231-121.8181284 133.13456658-146.5504346 179.06599187a435.75967738 435.75967738 0 0 0-23.04252112 49.10617311z" fill="#CA0C16"></path></symbol><symbol id="gitchat" viewBox="0 0 1024 1024"><path d="M892.08971773 729.08552746h-108.597062v-162.89559374H403.40293801v-108.59706198h488.68677972v271.49265572z m-651.58237345 54.298531V783.49265572h488.68678045v108.59706201H131.91028227V131.91028227h760.17943546v217.19412473h-108.597062V240.50734428H240.50734428v542.87671418z m542.98531145 0h108.597062v108.59706199h-108.597062v-108.59706199z" fill="#FF9100"></path></symbol><symbol id="toolbar-memberhead" viewBox="0 0 1303 1024"><path d="M1061.51168438 433.79527648A78.51879902 78.51879902 0 1 1 1129.35192643 472.74060007h-1.80593246l-48.05350474 403.97922198c-4.55409058 38.16013652-39.41643684 67.133573-80.79584389 67.13357302H319.35199503c-41.30088817 0-76.00619753-28.81639958-80.717325-66.97653526L189.01078861 472.74060007H187.12633728a78.51879902 78.51879902 0 1 1 67.76172401-38.86680556l193.31328323 119.81968805 158.13686148-336.06046024A78.5973179 78.5973179 0 0 1 658.23913228 80.14660493a78.51879902 78.51879902 0 0 1 51.58685077 137.721974l158.13686147 335.82490362 193.54883986-119.89820607z" fill="#FDD840"></path><path d="M1050.8331274 394.22180104a78.51879902 78.51879902 0 1 1 78.51879903 78.51879903h-1.80593246l-48.05350474 403.97922198c-4.55409058 38.16013652-39.41643684 67.133573-80.79584389 67.13357302H659.02432018C658.47468805 793.25433807 658.23913228 505.32590231 658.23913228 80.14660493a78.51879902 78.51879902 0 0 1 51.58685077 137.721974l158.13686147 335.82490362 193.54883986-119.89820607A78.51879902 78.51879902 0 0 1 1050.8331274 394.22180104z" fill="#FFBE00"></path></symbol><symbol id="toolbar-m-memberhead" viewBox="0 0 1303 1024"><path d="M1062.74839935 433.79527648A78.51879902 78.51879902 0 1 1 1130.58864141 472.74060007h-1.80593246l-48.05350474 403.97922198c-4.55409058 38.16013652-39.41643685 67.133573-80.79584389 67.13357302H320.58871c-41.30088817 0-76.00619753-28.81639958-80.71732499-66.97653526L190.24750358 472.74060007H188.36305226a78.51879902 78.51879902 0 1 1 67.761724-38.86680556l193.31328324 119.81968805 158.13686147-336.06046024A78.5973179 78.5973179 0 0 1 659.47584726 80.14660493a78.51879902 78.51879902 0 0 1 51.58685076 137.721974l158.13686148 335.82490362 193.54883985-119.89820607z" fill="#D6D6D6"></path><path d="M1052.06984238 394.22180104a78.51879902 78.51879902 0 1 1 78.51879903 78.51879903h-1.80593246l-48.05350474 403.97922198c-4.55409058 38.16013652-39.41643685 67.133573-80.79584389 67.13357302H660.26103515C659.71140302 793.25433807 659.47584726 505.32590231 659.47584726 80.14660493a78.51879902 78.51879902 0 0 1 51.58685076 137.721974l158.13686148 335.82490362 193.54883985-119.89820607A78.51879902 78.51879902 0 0 1 1052.06984238 394.22180104z" fill="#C1C1C1"></path></symbol><symbol id="csdnc-upload" viewBox="0 0 1024 1024"><path d="M216.37466416 723.16095396v84.46438188h591.25067168v-84.46438188c0-23.32483876 18.90735218-42.23219094 42.23219093-42.23219021s42.23219094 18.90735218 42.23219096 42.23219021v84.46438188c0 46.64967827-37.81470362 84.46438188-84.46438189 84.46438189H216.37466416c-46.64967827 0-84.46438188-37.81470362-84.46438189-84.4643819v-84.46438187c0-23.32483876 18.90735218-42.23219094 42.23219096-42.23219021s42.23219094 18.90735218 42.23219094 42.23219021zM469.76780906 275.55040991L246.55378774 499.53305726a42.30820888 42.30820888 0 0 1-59.99082735 0c-16.56346508-16.62259056-16.56346508-43.57095155 0-60.19354139L480.51167818 144.38144832A42.21952103 42.21952103 0 0 1 512 131.93984464a42.20262858 42.20262858 0 0 1 31.48409853 12.44160369l293.95294108 294.95806754c16.56346508 16.62259056 16.56346508 43.57095155 0 60.19354139a42.30820888 42.30820888 0 0 1-59.99082735 0L554.23219094 275.55040991V680.92876375c0 23.32483876-18.90735218 42.23219094-42.23219094 42.23219021s-42.23219094-18.90735218-42.23219094-42.23219021V275.55040991z"></path></symbol></svg><div>
+  
+  </div></body></html>
