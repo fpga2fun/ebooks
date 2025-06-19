@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="utf-8"> 
+  <link rel="canonical" href="https://blog.csdn.net/weixin_50810761/article/details/134818688"> 
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+  <meta name="renderer" content="webkit"> 
+  <meta name="force-rendering" content="webkit"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}"> 
+  <meta name="referrer" content="always"> 
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <link rel="alternate" media="handheld" href="#">  
+  <meta name="applicable-device" content="pc"> 
+  <link href="https://g.csdnimg.cn/static/logo/favicon32.ico" rel="shortcut icon" type="image/x-icon"> 
+  <title>xilinx原语详解及仿真之OSERDESE2-CSDN博客</title>  
+  <meta name="keywords" content="oserdese2"> 
+  <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;oserdese2&quot;}"> 
+  <meta name="description" content="文章浏览阅读5.6k次，点赞48次，收藏111次。OSERDESE2可以最多把14位并行数据转换为串行数据输出，串行输出数据可以与时钟单沿对齐，也可以采用双沿对齐。HDMI接口使用该原语实现比使用ODDR原语实现更加简单。_oserdese2"> 
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-351df2a831.min.css">  
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-blogstar2024/skin-blogstar2024-fc11876db1.min.css">    
+  <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">    
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css"> 
+  <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>      
+ 	<style>
+	main div.blog-content-box pre {
+		max-height: 100%;
+		overflow-y: hidden;
+	}
+	</style>
+ </head>  
+ <body class="nodata  " style=""> 
+  <div id="toolbarBox" style="min-height: 48px;"></div>    
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css"> 
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">   
+  <div class="main_father clearfix d-flex justify-content-center mainfather-concision" style="height:100%;"> 
+   <div class="container clearfix container-concision" id="mainBox">  
+    <main>  
+     <div class="blog-content-box"> 
+      <div class="article-header-box"> 
+       <div class="article-header"> 
+        <div class="article-title-box"> 
+         <h1 class="title-article" id="articleContentId">xilinx原语详解及仿真之OSERDESE2</h1> 
+        </div> 
+        <div class="article-info-box"> 
+         <div class="article-bar-top"> 
+          <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt=""> 
+          <div class="bar-content"> 
+           <a class="follow-nickName " href="https://x4mt7.blog.csdn.net" target="_blank" rel="noopener" title="电路_fpga">电路_fpga</a> 
+           <img class="article-time-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUpTime2.png" alt=""> 
+           <span class="time">已于&nbsp;2024-08-09 16:38:10&nbsp;修改</span> 
+           <div class="read-count-box"> 
+            <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes2.png" alt=""> 
+            <span class="read-count">阅读量5.6k</span> 
+            <a id="blog_detail_zk_collection" class="un-collection" data-report-click="{&quot;mod&quot;:&quot;popu_823&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect2.png" alt=""> <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive2.png" alt=""> <span class="name">收藏</span> <span class="get-collection"> 111 </span> </a> 
+            <div class="read-count-box is-like" data-type="top"> 
+             <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Active.png" alt=""> 
+             <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Black.png" alt=""> 
+             <span class="read-count" id="blog-digg-num">点赞数 48 </span> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="blog-tags-box"> 
+          <div class="tags-box artic-tag-box"> 
+           <span class="label">分类专栏：</span> 
+           <a class="tag-link" href="https://blog.csdn.net/weixin_50810761/category_10804581.html" target="_blank" rel="noopener">FPGA</a> 
+           <a class="tag-link" href="https://blog.csdn.net/weixin_50810761/category_12573376.html" target="_blank" rel="noopener">xilix原语</a> 
+           <a class="tag-link" href="https://blog.csdn.net/weixin_50810761/category_12573401.html" target="_blank" rel="noopener">HDMI</a> 
+           <span class="label">文章标签：</span> 
+           <a rel="noopener" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;fpga开发&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;fpga开发\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;fpga开发&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;fpga开发\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=fpga%E5%BC%80%E5%8F%91&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">fpga开发</a> 
+          </div> 
+         </div> 
+         <div class="up-time">
+          <span>于&nbsp;2023-12-13 17:45:37&nbsp;首次发布</span>
+         </div> 
+         <div class="slide-content-box"> 
+          <div class="article-copyright"> 
+           <div class="creativecommons">
+             本文为博主原创文章，未经博主允许不得转载！ 
+           </div> 
+           <div class="article-source-link">
+             本文链接：
+            <a href="https://blog.csdn.net/weixin_50810761/article/details/134818688" target="_blank">https://blog.csdn.net/weixin_50810761/article/details/134818688</a> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="operating"> 
+          <a class="href-article-edit slide-toggle">版权</a> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div id="blogHuaweiyunAdvert" class=""></div> 
+      <div id="blogColumnPayAdvert" class=""> 
+       <div class="column-group"> 
+        <div class="column-group-item column-group0 "> 
+         <div class="item-l"> 
+          <a class="item-target" href="https://blog.csdn.net/weixin_50810761/category_10804581.html" target="_blank" title="FPGA" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}"> <img class="item-target" src="https://i-blog.csdnimg.cn/columns/default/20201014180756928.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt=""> <span class="title item-target"> <span> <span class="tit">FPGA</span> <span class="dec more">同时被 3 个专栏收录<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/newArrowDown1White.png" alt=""></span> </span> </span> </a> 
+         </div> 
+         <div class="item-m"> 
+          <span>101 篇文章</span> 
+         </div> 
+         <div class="item-r"> 
+          <a class="item-target article-column-bt articleColumnFreeBt" data-id="10804581">订阅专栏</a> 
+         </div> 
+        </div> 
+        <div class="column-group-item column-group1 "> 
+         <div class="item-l"> 
+          <a class="item-target" href="https://blog.csdn.net/weixin_50810761/category_12573401.html" target="_blank" title="HDMI" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}"> <img class="item-target" src="https://i-blog.csdnimg.cn/columns/default/20201014180756916.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt=""> <span class="title item-target"> <span> <span class="tit">HDMI</span> </span> </span> </a> 
+         </div> 
+         <div class="item-m"> 
+          <span>15 篇文章</span> 
+         </div> 
+         <div class="item-r"> 
+          <a class="item-target article-column-bt articleColumnFreeBt" data-id="12573401">订阅专栏</a> 
+         </div> 
+        </div> 
+        <div class="column-group-item column-group2 "> 
+         <div class="item-l"> 
+          <a class="item-target" href="https://blog.csdn.net/weixin_50810761/category_12573376.html" target="_blank" title="xilix原语" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}"> <img class="item-target" src="https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt=""> <span class="title item-target"> <span> <span class="tit">xilix原语</span> </span> </span> </a> 
+         </div> 
+         <div class="item-m"> 
+          <span>14 篇文章</span> 
+         </div> 
+         <div class="item-r"> 
+          <a class="item-target article-column-bt articleColumnFreeBt" data-id="12573376">订阅专栏</a> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <article class="baidu_pl"> 
+       <div id="article_content" class="article_content clearfix"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css"> 
+        <div id="content_views" class="markdown_views prism-atelier-sulphurpool-light"> 
+         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;"> 
+          <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path> 
+         </svg> 
+         <p>  <a href="https://blog.csdn.net/weixin_50810761/article/details/137567268?csdn_share_tail=%7B%22type%22:%22blog%22,%22rType%22:%22article%22,%22rId%22:%22137567268%22,%22source%22:%22weixin_50810761%22%7D">Xlinx相关原语讲解导航页面，想要了解更过原语，可以点击该链接跳转。</a></p> 
+         <hr> 
+         <h2><a id="1OSERDESE2_4"></a><strong>1、概括OSERDESE2</strong></h2> 
+         <p>  <strong>OSERDESE2（Output Parallel-to-Serial Logic Resources是7系列FPGA器件中的专用并串转换器，具有特定的时钟和逻辑资源。</strong> 图1是OSERDESE2的框图，每个OSERDESE2模块都包含一个用于数据和三态控制的专用串行器。数据和三态串行器输出都可以配置为SDR（在时钟的单沿传输数据）和DDR（在时钟的双沿传输数据）模式。<strong>数据序列化最高可达 8:1（如果使用OSERDESE2宽度扩展，则为10:1或14:1）。</strong><br> <img src="https://i-blog.csdnimg.cn/blog_migrate/39432dff542c3d9932fb66d1ffd14171.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图1 OSERDESE2框图</font> 
+         </center> 
+         <p></p> 
+         <p>  OSERDESE2在FPGA中其实是和OLOGIC复用资源的，如图2所示，图中标注的是OLOGICE3，但是很多引脚都是OSERDESE2的，而OSERDESE2和OLOGICE3中的ODDR功能有相似的地方，都支持在时钟信号的双沿输出数据。所以这两个器件共用了资源，在使用时，同一个IO不能同时使用OLOGICE3和OSERDESE2的功能。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/f83b9bf04fb13932861b7ddfc713940d.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图2 OSERDESE2在FPGA中的分布</font> 
+         </center> 
+         <p></p> 
+         <p>  OSERDESE2模块是将并行数据转换为串行数据进行输出，一般并行转串行的时序如图3所示。在第二个时钟上升沿采集到clk_div输入4bit并行数据，在一个clk_div时钟周期内需要将并行数据转换为串行数据输出，那么使用clk与clk_div相位对齐(<strong>同一锁相环输出两个相位相同的时钟即可</strong>)，clk频率是clk_div四倍。然后在clk的上升沿从低位到高位依次输出din的数据。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/afade72fb7d136970737b309b2a77f49.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图3 SDR模式下并行转串行时序图</font> 
+         </center> 
+         <p></p> 
+         <p>  因此OSERDESE2也有两个时钟信号，一个与输出数据对齐CLK，一个与输入数据对齐的CLKDIV，CLK和CLKDIV的相位必须一致。此外OSERDESE2内部还有一个计数器，用来计数当前dout输出的是输入信号的第几位数据了，所以<strong>在使用OSERDESE2前，必须对OSERDESE2进行复位</strong>，复位信号可以是同步复位，也可以是异步复位，但是<strong>复位信号无效边沿必须与CLKDIV同步</strong>（即使用异步复位时，要考虑同步释放复位）。</p> 
+         <p>  上述转换关系可知，时钟clk与clk_div的时钟频率之比与输入数据和输出数据的位宽之比一致。如果要将10bit并行输入数据转换为串行数据输出，那么clk频率为clk_div的10倍。HDMI传输1024*768，60Hz刷新率图像时，并行数据时钟clk_div为65MHz，那么clk的时钟频率为650MHz，这在FPGA内部还可以实现。但需要传输1920*1080分辨率，60Hz刷新率图像时，需要时钟clk_div频率达到148.5MHz，而clk需要1485MHz，这在7系列FPGA内部显然无法实现。</p> 
+         <p>  如图4所示的DDR模式传输数据，在时钟clk上升沿和下降沿都输出数据，数据传输的速度提升一倍，传输同样的数据，相比SDR模式，DDR模式的时钟频率可以降低一半。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/d2f01f6f6a8b839156aee77086be5b1b.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图4 DDR模式下并行转串行时序图</font> 
+         </center> 
+         <p></p> 
+         <p>  在DDR模式下，两个时钟频率相差为输入数据位宽除以2。当然在DDR模式输入数据的位宽就不能是单数，时钟clk的频率不好处理。</p> 
+         <p>  OSERDESE2模块还包含一个用于IOB的三态控制的并串转换器，最多只能把4位并行数据转换为串行数据且不能级联。</p> 
+         <h2><a id="2OSERDESE2_29"></a><strong>2、OSERDESE2原语信号及参数</strong></h2> 
+         <h3><a id="21OSERDESE2_31"></a><strong>2.1、OSERDESE2原语端口</strong></h3> 
+         <p>  图5是OSERDESE2的原语框图，时钟CLK与输出串行数据对齐的高频时钟信号，而CLKDIV是与输入并行信号对齐的低频时钟信号。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/c62535b284df4d765ed423f0088ba9f1.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图5 OSERDESE2原语框图</font> 
+         </center> 
+         <p></p> 
+         <p>  D1~D8是并行输入数据端口，<strong>单个OSERDESE2最多配置8位输入并行输入数据，两个OSERDESE2模块级联可以配置10位或14位并行输入数据。注意D1最先转换为串行数据输出。</strong></p> 
+         <p>  <strong>OQ是串行输出信号，直接与IOB相连，该信号只能输出到FPGA管脚。</strong> 如果要将信号输出到ODELAYE2或者ISERDESE2，那么使用OFB端口，OFB和OQ两个端口的信号一模一样，只是数据走向不同。</p> 
+         <p>  OSERDESE2原语还有三态控制输出的功能，那么T1~T4是三态控制信号，与D1~D4数据对应。使用三态功能时，TQ作为串行输出的管脚，用于判断OQ信号此时是作为输入引脚（TQ为高电平）还是输出引脚（TQ为低电平），而TFB与TQ原理类似。</p> 
+         <p>  OCE就是数据转换的时钟使能信号，而TCE是三态转换的时钟使能信号，均是高电平有效。</p> 
+         <p>  SHIFTIN1、SHIFTIN2、SHIFTOUT1、SHIFTOUT2用于OSERDESE2转换数据时的位扩展，单个OSERDESE2最多只能将8bit并行数据转换位串行数据输出，而两个OSERDESE2级联最多可以将14bit并行数据转换位串行数据输出。如图6所示，是两个OSERDESE2将10bit并行输入转换为串行输出的连接框图。<strong>从OSERDESE2的SHIFTOUT1、SHIFTOUT2连接到主OSERDESE2的SHIFTIN1、SHIFTIN2实现扩展。从模块的输入数据从D3开始连接，D1和D2不能使用。</strong></p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/d1078215be87dbbe39f543f2fdfbab8c.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图6 OSERDESE2 宽度扩展框图</font> 
+         </center> 
+         <p></p> 
+         <p>  扩展OSERDESE2位宽时，如果是差分输出，主OSERDESE2必须位于差分输出对的正极（P 引脚）侧。表1列出了SDR和DDR模式的数据宽度可用取值。</p> 
+         <center> 
+          <font size="2">表1 SDR和DDR模式的数据宽度可用取值</font> 
+         </center> 
+         <table>
+          <thead>
+           <tr>
+            <th>模式</th>
+            <th>位宽(bit)</th>
+           </tr>
+          </thead>
+          <tbody>
+           <tr>
+            <td>SDR</td>
+            <td>2、3、4、5、6、7、8</td>
+           </tr>
+           <tr>
+            <td>DDR</td>
+            <td>4、6、8、10、14</td>
+           </tr>
+          </tbody>
+         </table> 
+         <p>  RST是一个异步的高电平复位，RST拉高时，会将CLK和CLKDIV时钟域下的所有触发器清零输出低电平。当设计中存在多个OSERDESE2模块时，推荐所有OSERDESE2均使用同一个复位信号，并且RST拉高应该与CLKDIV信号同步，确保所有OSERDESE2模块能够同时退出复位状态。</p> 
+         <h3><a id="22OSERDESE2_60"></a><strong>2.2、OSERDESE2原语参数</strong></h3> 
+         <p>  该原语总共存在11个参数，INIT_OQ用于表示OQ信号的初始状态，默认为1’b0。INIT_TQ用于表示TQ的初始状态，默认为1’b0。SRVAL_OQ用于表示OQ信号复位时的值，默认也为1’b0。SRVAL_TQ用于表示TQ信号复位时的值，默认也为1‘b0。在使用原语时，可以不对这四个参数进行修改，默认即可。</p> 
+         <p>  参数SERDES_MODE定义使用宽度扩展时OSERDESE2模块是主模块还是从模块。可以为MASTER或SLAVE，<strong>默认为MASTER</strong>。</p> 
+         <p>  参数DATA_RATE_OQ定义数据是以单数据速率(SDR)还是双数据速率(DDR)进行串行化处理，<strong>默认值为DDR。</strong></p> 
+         <p>  参数DATA_WIDTH定义并串转换器的并行数据输入宽度。当 DATA_RATE_OQ设置为SDR时，DATA_WIDTH可能取值为2、3、4、5、6、7和8。当DATA_RATE_OQ设置为DDR时，DATA_WIDTH属性的可能值为 4、6、8 、10 和 14。</p> 
+         <p>  参数DATA_RATE_TQ定义是否将三态控制作为单数据速率(SDR)还是双数据速率(DDR)进行处理。该属性允许的值为SDR、DDR或BUF，<strong>默认为DDR</strong>。在SDR和DDR模式下，使用T1~T4输入，并且可以使用TRISTATE_WIDTH配置三态输入宽度。<strong>在BUF模式下，SDR和DDR模式寄存器被旁路，使用T1输入。</strong></p> 
+         <p>  参数TRISTATE_WIDTH定义三态控制并串转换器的并行三态输入宽度。<strong>当DATA_RATE_TQ设置为SDR或BUF时，TRISTATE_WIDTH属性只能设置为1</strong>。当DATA_RATE_TQ设置为DDR时，TRISTATE_WIDTH属性的可能值为1和4。</p> 
+         <p>图7显示了使用OSERDESE2的有效设置和组合。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/18d3897568395973e4739865e55d95f0.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图7 OSERDESE2属性组合</font> 
+         </center> 
+         <p></p> 
+         <p>  OSERDESE2块的输入到输出延迟指的是当CLKDIV的上升沿把输入数据D1~D8端口的数据寄存到OSERDESE2内部时 到 OSERDESE2的OQ端口输出第一位数据的时间间隔。当CLK和CLKDIV的相位对齐时，延迟可能相差一个CLK周期，如果CLK和CLKDIV的相位没有对齐时，延迟的值取决于DATA_RATE和DATA_WIDTH的值，如图8所示。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/19ce2e0d334d8ee5883bb75e1f540fee.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图8 OSERDESE2 延迟</font> 
+         </center> 
+         <p></p> 
+         <h3><a id="23OSERDESE2_82"></a><strong>2.3、OSERDESE2模式时序</strong></h3> 
+         <p>  如图9所示，OSERDESE2采用SDR模式将2位并行数据转换为串行数据输出，时钟CLK和CLKDIV的相位是对齐的，在CLKDIV第二个上升沿时，采集到两位并行输入数据2’bBA，经过一个CLK延迟后，在CLK的第一个上升沿输出A，第二CLK上升沿输出B，完成并行到串行数据的转换。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/f8fcab05891ea70ee88c7928325b7c36.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图9 2:1 SDR模式下OSERDESE2的时序图</font> 
+         </center> 
+         <p></p> 
+         <p>  如图10所示，OSERDESE2采用DDR模式将8位并行数据转换为串行数据输出，在CLKDIV第二个上升沿时，OSERDESE2采样D1~D8的输入数据ABCDEFGH到内部，经过四个CLK周期后，在CLK的上升沿OQ输出第一个数据A，在CLK下降沿OQ输出第二个数据B，依次在双沿输出所有数据。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/d4f28fee02a8321aab8a80ce0ad18ca8.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图10 8:1 DDR模式下OSERDESE2的时序图</font> 
+         </center> 
+         <p></p> 
+         <p>  在CLKDIV第三个时钟周期内输出完第二个CLKDIV时钟采集的数据，在CLKDIV第四个时钟开始输出在CLKDIV第三个时钟采集到D1~D8的数据。</p> 
+         <p>  如图11是使用三态传输时的时序图，此时最多将4位并行数据转为串行数据输出，在时钟CLKDIV第三个上升沿处，采集到D1<sub>D4的数据位EFGH，与此时T1</sub>T4的数据0010对应。</p> 
+         <p>  经过一个CLK时钟周期后，OQ输出第一个串行数据E，而TQ开始输出对应三态数据0，当TQ数据为0时，才会将OQ的数据输出到IOB模块，当TQ为1时，FPGA管脚作为输入，此时不会把OQ的数据输出到IOB。因此图11中当TQ为低电平时，OBUFT.O才输出OQ对应的数据EFH，否则不输出OQ的数据。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/bf092b6dd0c00011de644802d2f877ac.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图11 4:1 DDR模式下OSERDESE2三态传输的时序图</font> 
+         </center> 
+         <p></p> 
+         <h2><a id="3OSERDESE2_100"></a><strong>3、OSERDESE2原语仿真</strong></h2> 
+         <p>  在Vivado中获取OSERDESE2原语模板，获取方式在讲解IDDR原语时已经详细讲过，不再赘述，获取原语模板如下所示：</p> 
+         <pre><code  style="height: 50vh;">   OSERDESE2 #(
+      .DATA_RATE_OQ("DDR"),   // DDR, SDR
+      .DATA_RATE_TQ("DDR"),   // DDR, BUF, SDR
+      .DATA_WIDTH(4),         // Parallel data width (2-8,10,14)
+      .INIT_OQ(1'b0),         // Initial value of OQ output (1'b0,1'b1)
+      .INIT_TQ(1'b0),         // Initial value of TQ output (1'b0,1'b1)
+      .SERDES_MODE("MASTER"), // MASTER, SLAVE
+      .SRVAL_OQ(1'b0),        // OQ output value when SR is used (1'b0,1'b1)
+      .SRVAL_TQ(1'b0),        // TQ output value when SR is used (1'b0,1'b1)
+      .TBYTE_CTL("FALSE"),    // Enable tristate byte operation (FALSE, TRUE)
+      .TBYTE_SRC("FALSE"),    // Tristate byte source (FALSE, TRUE)
+      .TRISTATE_WIDTH(4)      // 3-state converter width (1,4)
+   )
+   OSERDESE2_inst (
+      .OFB(OFB),             // 1-bit output: Feedback path for data
+      .OQ(OQ),               // 1-bit output: Data path output
+      // SHIFTOUT1 / SHIFTOUT2: 1-bit (each) output: Data output expansion (1-bit each)
+      .SHIFTOUT1(SHIFTOUT1),
+      .SHIFTOUT2(SHIFTOUT2),
+      .TBYTEOUT(TBYTEOUT),   // 1-bit output: Byte group tristate
+      .TFB(TFB),             // 1-bit output: 3-state control
+      .TQ(TQ),               // 1-bit output: 3-state control
+      .CLK(CLK),             // 1-bit input: High speed clock
+      .CLKDIV(CLKDIV),       // 1-bit input: Divided clock
+      // D1 - D8: 1-bit (each) input: Parallel data inputs (1-bit each)
+      .D1(D1),
+      .D2(D2),
+      .D3(D3),
+      .D4(D4),
+      .D5(D5),
+      .D6(D6),
+      .D7(D7),
+      .D8(D8),
+      .OCE(OCE),             // 1-bit input: Output data clock enable
+      .RST(RST),             // 1-bit input: Reset
+      // SHIFTIN1 / SHIFTIN2: 1-bit (each) input: Data input expansion (1-bit each)
+      .SHIFTIN1(SHIFTIN1),
+      .SHIFTIN2(SHIFTIN2),
+      // T1 - T4: 1-bit (each) input: Parallel 3-state inputs
+      .T1(T1),
+      .T2(T2),
+      .T3(T3),
+      .T4(T4),
+      .TBYTEIN(TBYTEIN),     // 1-bit input: Byte group tristate
+      .TCE(TCE)              // 1-bit input: 3-state clock enable
+   );
+</code ></pre> 
+         <h3><a id="31_SDR_153"></a><strong>3.1 SDR模式并串转换</strong></h3> 
+         <p>  首先来一个SDR模式的串并转换，输入5位并行数据，输出1位串行数据，高速时钟CLK的频率是输入数据时钟CLKDIV的5倍，对应的设计代码如下所示：</p> 
+         <pre><code  style="height: 50vh;">module oserdese2_ctrl(
+    input           clk      ,//系统时钟信号；
+    input           clk_div  ,
+    input           rst      ,//系统复位信号，高电平有效；
+    input [4 : 0]   din      ,//输入数据；
+
+    output          oq       //输出数据
+); 
+    //例化主OSERDESE2原语
+    OSERDESE2 #(
+        .DATA_RATE_OQ   ( "SDR"     ),// DDR, SDR
+        .DATA_RATE_TQ   ( "DDR"     ),// DDR, BUF, SDR
+        .DATA_WIDTH     ( 5         ),// Parallel data width (2-8,10,14)
+        .INIT_OQ        ( 1'b0      ),// Initial value of OQ output (1'b0,1'b1)
+        .INIT_TQ        ( 1'b0      ),// Initial value of TQ output (1'b0,1'b1)
+        .SERDES_MODE    ( "MASTER"  ),// MASTER, SLAVE
+        .SRVAL_OQ       ( 1'b0      ),// OQ output value when SR is used (1'b0,1'b1)
+        .SRVAL_TQ       ( 1'b0      ),// TQ output value when SR is used (1'b0,1'b1)
+        .TBYTE_CTL      ( "FALSE"   ),// Enable tristate byte operation (FALSE, TRUE)
+        .TBYTE_SRC      ( "FALSE"   ),// Tristate byte source (FALSE, TRUE)
+        .TRISTATE_WIDTH ( 1         ) // 3-state converter width (1,4)
+    )
+    OSERDESE2_inst (
+        .OFB        (           ),// 1-bit output: Feedback path for data
+        .OQ         (oq         ),// 1-bit output: Data path output
+        // SHIFTOUT1 / SHIFTOUT2: 1-bit (each) output: Data output expansion (1-bit each)
+        .SHIFTOUT1  (           ),
+        .SHIFTOUT2  (           ),
+        .TBYTEOUT   (           ),// 1-bit output: Byte group tristate
+        .TFB        (           ),// 1-bit output: 3-state control
+        .TQ         (           ),// 1-bit output: 3-state control
+        .CLK        (clk        ),// 1-bit input: High speed clock
+        .CLKDIV     (clk_div    ),// 1-bit input: Divided clock
+        // D1 - D8: 1-bit (each) input: Parallel data inputs (1-bit each)
+        .D1         (din[0]     ),
+        .D2         (din[1]     ),
+        .D3         (din[2]     ),
+        .D4         (din[3]     ),
+        .D5         (din[4]     ),
+        .D6         (           ),
+        .D7         (           ),
+        .D8         (           ),
+        .OCE        (1'b1       ),// 1-bit input: Output data clock enable
+        .RST        (rst        ),// 1-bit input: Reset
+        // SHIFTIN1 / SHIFTIN2: 1-bit (each) input: Data input expansion (1-bit each)
+        .SHIFTIN1   (           ),
+        .SHIFTIN2   (           ),
+        // T1 - T4: 1-bit (each) input: Parallel 3-state inputs
+        .T1         (1'b0       ),
+        .T2         (1'b0       ),
+        .T3         (1'b0       ),
+        .T4         (1'b0       ),
+        .TBYTEIN    (1'b0       ),// 1-bit input: Byte group tristate
+        .TCE        (1'b0       )  // 1-bit input: 3-state clock enable
+    );
+
+endmodule
+</code ></pre> 
+         <p>  对应的TestBench文件如下所示：</p> 
+         <pre><code  style="height: 50vh;">`timescale 1 ns/1 ns
+module test();
+    parameter	CYCLE		=   70      ;//系统时钟周期，单位ns，默认70ns；
+
+    reg			                clk     ;//系统时钟，默认100MHz；
+    reg			                rst     ;//系统复位，默认高电平有效；
+    reg                         clk_div ;
+    reg   [4 : 0]               din     ;
+
+    wire                        oq      ;
+
+    oserdese2_ctrl  u_oserdese2_ctrl (
+        .clk        ( clk       ),
+        .clk_div    ( clk_div   ),
+        .rst        ( rst       ),
+        .din        ( din       ),
+        .oq         ( oq        )
+    );
+
+    //生成周期为CYCLE数值的系统时钟;
+    initial begin
+        clk_div = 1;
+        forever #(CYCLE/2) clk_div = ~clk_div;
+    end
+    initial begin
+        clk = 1;
+        forever #(CYCLE/10) clk = ~clk;
+    end
+
+    //生成复位信号；
+    initial begin
+        rst = 0;
+        #2;
+        rst = 1;//开始时复位10个时钟；
+        #(10*CYCLE);
+        rst = 0;
+        repeat(120) @(posedge clk);
+        $stop;//停止仿真；
+    end
+
+    initial begin
+        #1;
+        din = 5'd0;
+        forever begin
+            #(CYCLE);
+            din = ({$random} % 32);
+        end
+    end
+
+endmodule
+</code ></pre> 
+         <p>  运行仿真得到部分仿真截图，如图12所示，如果不注意分析，会以为仿真结果错误。复位信号rst复位完成(拉低)后，clk在760ns之后采集到第一个输入数据5’b01101，什么时候OQ才输出数据？通过查阅图8可知，在SDR模式，输入数据位宽：输出数据位宽之比等于5:1时，<strong>延迟4个clk时钟后OQ输出数据</strong>，所以在图12中820ns后的第一个时钟上升沿开始输出采集到的最低位数据1’b1，下个时钟上升沿输出1’b0，依次完成数据转换。注意OQ输出开始输出的clk时钟边沿并没有与clk_div的时钟边沿对齐。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/37dc98f4e1c825aabbdc593001b4d85c.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图12 OSERDESE2在SDR模式下将5位并行数据串行化的仿真图</font> 
+         </center> 
+         <p></p> 
+         <p>  <strong>特别注意：OQ输出数据与采集到数据的时间间隔要与图8表中的间隔一致，不然会错误分析</strong>。</p> 
+         <p>  然后把该工程的引脚进行分配，综合、实现工程，查看OQ信号在FPGA中的位置，如图13所示。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/1a8a7ce7ee28da038f49ec3312e908c8.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图13 OQ信号的分布</font> 
+         </center> 
+         <p></p> 
+         <p>  把OQ信号前面的OSERDESE2放大，如图14所示，OSERDESE2占据OLOGICE3的位置，因此OLOGICE3与OSERDESE2是复用一些资源的。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/d66c72bda0405aca12b2ea06d34dcc31.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图14 OSERDESE2布局布线</font> 
+         </center> 
+         <p></p> 
+         <h3><a id="32_DDR_284"></a><strong>3.2 DDR模式并串转换</strong></h3> 
+         <p>  图12中，clk频率是clk_div频率的5倍，同样的时钟关系，OSERDESE2使用DDR模式，可以把输入的10位并行数据转换为串行数据输出，单个OSERDESE2最多只能把8位并行数据转换位串行数据，因此需要两个OSERDESE2级联使用，对应的代码如下所示：</p> 
+         <pre><code  style="height: 50vh;">module oserdese2_ctrl(
+    input           clk      ,//系统时钟信号；
+    input           clk_div  ,
+    input           rst      ,//系统复位信号，高电平有效；
+    input [9 : 0]   din      ,//输入数据；
+
+    output          oq       //输出数据
+);
+    wire            shiftou1;
+    wire            shiftou2;
+    //例化主OSERDESE2原语
+    OSERDESE2 #(
+        .DATA_RATE_OQ   ( "DDR"     ),// DDR, SDR
+        .DATA_RATE_TQ   ( "DDR"     ),// DDR, BUF, SDR
+        .DATA_WIDTH     ( 10        ),// Parallel data width (2-8,10,14)
+        .INIT_OQ        ( 1'b0      ),// Initial value of OQ output (1'b0,1'b1)
+        .INIT_TQ        ( 1'b0      ),// Initial value of TQ output (1'b0,1'b1)
+        .SERDES_MODE    ( "MASTER"  ),// MASTER, SLAVE
+        .SRVAL_OQ       ( 1'b0      ),// OQ output value when SR is used (1'b0,1'b1)
+        .SRVAL_TQ       ( 1'b0      ),// TQ output value when SR is used (1'b0,1'b1)
+        .TBYTE_CTL      ( "FALSE"   ),// Enable tristate byte operation (FALSE, TRUE)
+        .TBYTE_SRC      ( "FALSE"   ),// Tristate byte source (FALSE, TRUE)
+        .TRISTATE_WIDTH ( 1         ) // 3-state converter width (1,4)
+    )
+    u_OSERDESE2_M (
+        .OFB        (           ),// 1-bit output: Feedback path for data
+        .OQ         (oq         ),// 1-bit output: Data path output
+        // SHIFTOUT1 / SHIFTOUT2: 1-bit (each) output: Data output expansion (1-bit each)
+        .SHIFTOUT1  (           ),
+        .SHIFTOUT2  (           ),
+        .TBYTEOUT   (           ),// 1-bit output: Byte group tristate
+        .TFB        (           ),// 1-bit output: 3-state control
+        .TQ         (           ),// 1-bit output: 3-state control
+        .CLK        (clk        ),// 1-bit input: High speed clock
+        .CLKDIV     (clk_div    ),// 1-bit input: Divided clock
+        // D1 - D8: 1-bit (each) input: Parallel data inputs (1-bit each)
+        .D1         (din[0]     ),
+        .D2         (din[1]     ),
+        .D3         (din[2]     ),
+        .D4         (din[3]     ),
+        .D5         (din[4]     ),
+        .D6         (din[5]     ),
+        .D7         (din[6]     ),
+        .D8         (din[7]     ),
+        .OCE        (1'b1       ),// 1-bit input: Output data clock enable
+        .RST        (rst        ),// 1-bit input: Reset
+        // SHIFTIN1 / SHIFTIN2: 1-bit (each) input: Data input expansion (1-bit each)
+        .SHIFTIN1   (shiftou1   ),
+        .SHIFTIN2   (shiftou2   ),
+        // T1 - T4: 1-bit (each) input: Parallel 3-state inputs
+        .T1         (1'b0       ),
+        .T2         (1'b0       ),
+        .T3         (1'b0       ),
+        .T4         (1'b0       ),
+        .TBYTEIN    (1'b0       ),// 1-bit input: Byte group tristate
+        .TCE        (1'b0       )  // 1-bit input: 3-state clock enable
+    );
+
+    //例化从OSERDESE2原语
+    OSERDESE2 #(
+        .DATA_RATE_OQ   ( "DDR"     ),// DDR, SDR
+        .DATA_RATE_TQ   ( "DDR"     ),// DDR, BUF, SDR
+        .DATA_WIDTH     ( 10        ),// Parallel data width (2-8,10,14)
+        .INIT_OQ        ( 1'b0      ),// Initial value of OQ output (1'b0,1'b1)
+        .INIT_TQ        ( 1'b0      ),// Initial value of TQ output (1'b0,1'b1)
+        .SERDES_MODE    ( "SLAVE"   ),// MASTER, SLAVE
+        .SRVAL_OQ       ( 1'b0      ),// OQ output value when SR is used (1'b0,1'b1)
+        .SRVAL_TQ       ( 1'b0      ),// TQ output value when SR is used (1'b0,1'b1)
+        .TBYTE_CTL      ( "FALSE"   ),// Enable tristate byte operation (FALSE, TRUE)
+        .TBYTE_SRC      ( "FALSE"   ),// Tristate byte source (FALSE, TRUE)
+        .TRISTATE_WIDTH ( 1         ) // 3-state converter width (1,4)
+    )
+    u_OSERDESE2_S (
+        .OFB        (           ),// 1-bit output: Feedback path for data
+        .OQ         (           ),// 1-bit output: Data path output
+        // SHIFTOUT1 / SHIFTOUT2: 1-bit (each) output: Data output expansion (1-bit each)
+        .SHIFTOUT1  (shiftou1   ),
+        .SHIFTOUT2  (shiftou2   ),
+        .TBYTEOUT   (           ),// 1-bit output: Byte group tristate
+        .TFB        (           ),// 1-bit output: 3-state control
+        .TQ         (           ),// 1-bit output: 3-state control
+        .CLK        (clk        ),// 1-bit input: High speed clock
+        .CLKDIV     (clk_div    ),// 1-bit input: Divided clock
+        // D1 - D8: 1-bit (each) input: Parallel data inputs (1-bit each)
+        .D1         (           ),
+        .D2         (           ),
+        .D3         (din[8]     ),
+        .D4         (din[9]     ),
+        .D5         (           ),
+        .D6         (           ),
+        .D7         (           ),
+        .D8         (           ),
+        .OCE        (1'b1       ),// 1-bit input: Output data clock enable
+        .RST        (rst        ),// 1-bit input: Reset
+        // SHIFTIN1 / SHIFTIN2: 1-bit (each) input: Data input expansion (1-bit each)
+        .SHIFTIN1   (           ),
+        .SHIFTIN2   (           ),
+        // T1 - T4: 1-bit (each) input: Parallel 3-state inputs
+        .T1         (1'b0       ),
+        .T2         (1'b0       ),
+        .T3         (1'b0       ),
+        .T4         (1'b0       ),
+        .TBYTEIN    (1'b0       ),// 1-bit input: Byte group tristate
+        .TCE        (1'b0       )  // 1-bit input: 3-state clock enable
+    );
+
+endmodule
+</code ></pre> 
+         <p>  TestBench只需要把第8行代码的输入数据位宽改为10位，第46行输入数据的赋值改成下面代码就行了。</p> 
+         <pre><code>din = ({$random} % 1024);
+</code ></pre> 
+         <p>  仿真结果如图15所示，与SDR的区别在于DDR的oq信号在clk的上升沿和下降沿都会传输数据。clk_div采集到数据与oq输出数据的间隔由图8表中查得为4个clk周期，所以图15中clk_div采集到10’b0100001101，经过四个clk周期后，oq开始输出最低位数据，之后依次输出剩余数据。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/45ca54689be82a6cc946a377079d6d04.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图15 DDR模式下10位并行转串行仿真</font> 
+         </center> 
+         <p></p> 
+         <p>  对新加入的几个管脚进行分配，对工程综合、实现，查看最后两个OSERDESE2的布局如图16所示，OQ的管脚直接与主OSERDESE2的输出连接，从OSERDESE2的SHIFTOUT1、SHIFTOUT2分别与主OSERDESE2的SHIFTIN1、SHIFTIN2连接。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/1cf99bb81dd42774b204568039927d74.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图16 10位并行转串行数据的OSERDESE2布局图</font> 
+         </center> 
+         <p></p> 
+         <p>  将主从OSERDESE2分别放大后如图17所示。</p> 
+         <p><img src="https://i-blog.csdnimg.cn/blog_migrate/7b82a5cbc046a719bab5627198db0719.png#pic_center" alt="在这里插入图片描述"></p> 
+         <center> 
+          <font size="2">图17 放大后的主从OSERDESE2</font> 
+         </center> 
+         <p></p> 
+         <p>  综上就是OSERDESE2原语的常用模式，DDR模式在HDMI接口中比ODDR更适用，效果也更好，在HDMI驱动模块设计时，将会使用OSERDESE2的DDR模式将10位数据转化为双沿传输的数据输出。</p> 
+         <p>  需要本文所使用工程的在公众号后台回复” <strong>OSERDESE2</strong>”(不包括引号)即可，工程中的代码为最初模式，其余模式按照文中描述修改即可。</p> 
+         <hr> 
+         <p>  <strong>如果对文章内容理解有疑惑或者对代码不理解，可以在评论区或者后台留言，看到后均会回复！</strong></p> 
+         <p>  <strong>如果本文对您有帮助，还请多多点赞👍、评论💬和收藏⭐！您的支持是我更新的最大动力！将持续更新工程！</strong></p> 
+        </div> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-a5d25dd831.css" rel="stylesheet"> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-e504d6a974.css" rel="stylesheet"> 
+       </div> 
+       <div id="blogExtensionBox" style="margin-top:12px" class="blog-extension-box"></div> 
+      </article>  
+     </div> 
+     <div class="directory-boxshadow-dialog" style="display:none;"> 
+      <div class="directory-boxshadow-dialog-box"> 
+      </div> 
+      <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new"> 
+       <img class="limited-img limited-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-newWhite.png"> 
+       <div class="vip-limited-time-top">
+         确定要放弃本次机会？ 
+       </div> 
+       <span class="vip-limited-time-text">福利倒计时</span> 
+       <div class="limited-time-box-new"> 
+        <span class="time-hour"></span> 
+        <i>:</i> 
+        <span class="time-minite"></span> 
+        <i>:</i> 
+        <span class="time-second"></span> 
+       </div> 
+       <div class="limited-time-vip-box"> 
+        <p> <img class="coupon-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-roup.png"> <span class="def">立减 ¥</span> <span class="active limited-num"></span> </p> 
+        <span class="">普通VIP年卡可用</span> 
+       </div> 
+       <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9621&quot;}" data-report-query="spm=1001.2101.3001.9621">立即使用</a> 
+      </div> 
+     </div> 
+     <div class="more-toolbox-new more-toolbar" id="toolBarBox"> 
+      <div class="left-toolbox"> 
+       <div class="toolbox-left"> 
+        <div class="profile-box"> 
+         <a class="profile-href" target="_blank" href="https://x4mt7.blog.csdn.net"><img class="profile-img" src="https://i-avatar.csdnimg.cn/b745572207b440b2aacb08a10f2cba89_weixin_50810761.jpg!1"> <span class="profile-name"> 电路_fpga </span> </a> 
+        </div> 
+        <div class="profile-attend"> 
+         <a class="tool-attend tool-bt-button tool-unbt-attend" href="javascript:;" data-report-view="{&quot;mod&quot;:&quot;1592215036_002&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;extend1&quot;:&quot;已关注&quot;}">已关注</a> 
+         <a class="tool-item-follow active-animation" style="display:none;">关注</a> 
+        </div> 
+       </div> 
+       <div class="toolbox-middle"> 
+        <ul class="toolbox-list"> 
+         <li class="tool-item tool-item-size tool-active is-like" id="is-like" data-type="bottom"> <a class="tool-item-href"> <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt=""> <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/like-active.png" alt=""> <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/like.png" alt=""> <span id="spanCount" class="count "> 48 </span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">点赞</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active is-unlike" id="is-unlike"> <a class="tool-item-href"> <img class="isactive" style="margin-right:0px;display:none" id="is-unlike-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/unlike-active.png" alt=""> <img class="isdefault" style="margin-right:0px;display:block" id="is-unlike-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/unlike.png" alt=""> <span id="unlikeCount" class="count "></span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">踩</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active is-collection "> <a class="tool-item-href" href="javascript:;" data-report-click="{&quot;mod&quot;:&quot;popu_824&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4130&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/collect-active.png" alt=""> <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/collect.png" alt=""> <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectActive.png" alt=""> <span class="count get-collection " data-num="111" id="get-collection"> 111 </span> </a> 
+          <div class="tool-hover-tip collect"> 
+           <div class="collect-operate-box"> 
+            <span class="collect-text" id="is-collection"> 收藏 </span> 
+           </div> 
+          </div> 
+          <div class="tool-active-list"> 
+           <div class="text">
+             觉得还不错? 
+            <span class="collect-text" id="tool-active-list-collection"> 一键收藏 </span> 
+            <img id="tool-active-list-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/collectionCloseWhite.png" alt=""> 
+           </div> 
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active tool-item-comment"> 
+          <div class="guide-rr-first"> 
+           <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward01.png" alt=""> 
+           <button class="btn-guide-known">知道了</button> 
+          </div> <a class="tool-item-href go-side-comment" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.7009&quot;}"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/comment.png" alt=""> <span class="count"> 8 </span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">评论</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active tool-QRcode" data-type="article" id="tool-share"> <a class="tool-item-href" href="javascript:;" data-report-view="{&quot;spm&quot;:&quot;3001.4129&quot;,&quot;extra&quot;:{&quot;type&quot;:&quot;blogdetail&quot;}}"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/share.png" alt=""> <span class="count">分享</span> </a> 
+          <div class="QRcode" id="tool-QRcode"> 
+           <div class="share-bg-box"> 
+            <div class="share-content"> 
+             <a id="copyPosterUrl" data-type="link" class="btn-share">复制链接</a> 
+            </div> 
+            <div class="share-content"> 
+             <a class="btn-share" data-type="qq">分享到 QQ</a> 
+            </div> 
+            <div class="share-content"> 
+             <a class="btn-share" data-type="weibo">分享到新浪微博</a> 
+            </div> 
+            <div class="share-code"> 
+             <div class="share-code-box" id="shareCode"></div> 
+             <div class="share-code-text"> 
+              <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/share/icon-wechat.png" alt="">扫一扫 
+             </div> 
+            </div> 
+           </div> 
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active tool-item-reward"> <a class="tool-item-href" href="javascript:;" data-report-click="{&quot;mod&quot;:&quot;popu_830&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4237&quot;,&quot;dest&quot;:&quot;&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img class="isdefault reward-bt" id="rewardBtNew" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/reward.png" alt="打赏"> <span class="count">打赏</span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">打赏</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active is-more" id="is-more"> <a class="tool-item-href"> <img class="isdefault" style="margin-right:0px;display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/more.png" alt=""> <span class="count"></span> </a> 
+          <div class="more-opt-box"> 
+           <div class="mini-box"> 
+            <a class="tool-item-href" id="rewardBtNewHide" data-report-click="{&quot;spm&quot;:&quot;3001.4237&quot;,&quot;extra&quot;:&quot;{\&quot;type\&quot;:\&quot;hide\&quot;}&quot;}"> <img class="isdefault reward-bt" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/reward.png" alt="打赏"> <span class="count">打赏</span> </a> 
+            <a class="tool-item-href" id="toolReportBtnHide"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/report.png" alt=""> <span class="count">举报</span> </a> 
+           </div> 
+           <div class="normal-box"> 
+            <a class="tool-item-href" id="toolReportBtnHideNormal"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/toolbar/report.png" alt=""> <span class="count">举报</span> </a> 
+           </div> 
+          </div> </li> 
+        </ul> 
+       </div> 
+       <div class="toolbox-right"> 
+        <div class="tool-directory"> 
+         <a class="bt-columnlist-show" data-id="10804581" data-free="true" data-description="" data-subscribe="false" data-title="FPGA" data-img="https://i-blog.csdnimg.cn/columns/default/20201014180756928.png?x-oss-process=image/resize,m_fixed,h_224,w_224" data-url="https://blog.csdn.net/weixin_50810761/category_10804581.html" data-sum="101" data-people="216" data-price="0" data-hotrank="0" data-status="true" data-oldprice="0" data-join="false" data-studyvip="true" data-studysubscribe="false" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6334&quot;,&quot;extend1&quot;:&quot;专栏目录&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6334&quot;,&quot;extend1&quot;:&quot;专栏目录&quot;}">专栏目录</a> 
+        </div> 
+       </div> 
+      </div> 
+     </div>    
+     <a id="commentBox" name="commentBox"></a> 
+    </main> 
+   </div> 
+   <div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right-concision"> 
+      <div class="flex-column aside-box groupfile" id="groupfileConcision"> 
+       <div class="groupfile-div1"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+  </div> 
+  <div class="mask-dark"></div> 
+  <div class="skin-boxshadow"></div> 
+  <div class="directory-boxshadow"></div> 
+  <div style="display:none;"> 
+   <img src="" onerror="setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){var test=&quot;\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74&quot;}},3000);"> 
+  </div> 
+  <div class="keyword-dec-box" id="keywordDecBox"></div> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/chart.css">        
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-dark.css">                  
+ </body>
+</html>
